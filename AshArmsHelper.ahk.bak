@@ -26,7 +26,6 @@ stdLoadTime = 8.0
 ; Click error
 stdErrorRange = 12.0  ; px
 
-
 ; Create GUI control panel
 clickPos := "Current Click -> x = 0, y = 0"
 workStatus := "Starting"
@@ -35,7 +34,9 @@ winSize := "Target Window Size"
 winResolutionWidth := 1280
 winResolutionHeight := 720
 
+; Script states
 canRun := false
+isRepeatTask := false
 useCoordDataOnly := false
 
 
@@ -49,9 +50,17 @@ Gui, Add, Button, x5 y85 h20 w50 gTestFind, % "Start"
 Gui, Add, Button, x5 y105 h20 w50 gBigSwitchOff, % "Stop"
 Gui, Add, Button, x5 y125 h20 w50 gTapTap, % "Tap Fes!"
 
+; map selection dropdown list
+Gui, Add, DropDownList, x250 y150 vStageChoice gOnStageSelect w100 h50 Choose2 R5, 遺跡 01-02|雪原 03A-02 N|溶岩 04A-10 N
+
 Gui, Add, CheckBox, x5 y145 h20 w150 gForceClick, % "Coord mode for scale"
 
 GuiControl,, ClickPosIndicator, % "Ready"
+
+
+; Initialize
+; Selected Grinding Stage
+;~ gosub OnStageSelect
 
 ; try get window handle
 WinGet, asaGameHwnd, ID, アッシュアームズ - MuMu模拟器
@@ -126,6 +135,14 @@ return
 
 
 
+OnStageSelect:
+Gui, Submit, nohide
+selStage := StageChoice
+TrayTip,, Grinding Stage: %selStage%, 5
+return
+
+
+
 ; Subroutines
 TapTap:
 ;~ quickTapAnywhere()
@@ -133,14 +150,41 @@ TapTap:
 ;~ simulateRandomBehavior()
 ;~ autoBattle()
 ;~ checkBattleResult()
-findClick(mapCampaign,,,true)
+;~ findClick(mapCampaign,,,true)
 ;~ checkForError()
+;~ MsgBox, %MapChoice%
+gosub BigSwitchOn
 return
 
 
 TestFind:
-gosub BigSwitchOn
-gosub Grind03A-02N
+;~ gosub BigSwitchOn
+while(true) {
+	gosub CheckWorkStatus
+	
+	;~ MsgBox % canRun
+	if(!canRun) {
+		TrayTip,, Stop Stop Stop, 5
+		break  ; the whole script should halt here
+	} else {
+		TrayTip,, go go go, 5
+	}
+}
+changeStatusText("Script stopped.")
+
+;~ TrayTip,, Stop Stop Stop, 5
+
+
+; use a timer to check if current work is done and if dispatcher is allowed to issue new work
+
+
+;~ if(selStage = "雪原 03A-02 N") {
+	;~ gosub Grind03A-02N
+;~ } else if(selStage = "溶岩 04A-10 N") {
+	;~ gosub Grind04A-10N
+;~ }
+
+;~ gosub Grind03A-02N
 
 ;~ WinActivate, ahk_id %asaGameHwnd%
 ;~ ImageSearch, imgX, imgY, mapNodeSelection["x1"], mapNodeSelection["y1"], mapNodeSelection["x2"], mapNodeSelection["y2"], *50 mapSel_03A-02N.png
@@ -155,13 +199,53 @@ gosub Grind03A-02N
 ;~ }
 return
 
+CheckWorkStatus:
+; need improvement
+; 1. if isRepeatTask is false and canRun is true, then it's a new work
+; 2. if isRepeatTask is true and canRun is true, then it's a repeated work
+; 3. whenever canRun is false, stop
+if(canRun) {
+	; work is done and big switch is on; we can dispatch new work
+	; find the selected work at the moment
+	if(selStage = "雪原 03A-02 N") {
+		if(!isRepeatTask) {
+			MsgBox, New Task
+			gosub Grind03A-02N  ; start from home page
+			isRepeatTask := true
+		} else {
+			gosub Continue03A-02N  ; start from stage selection page
+			isRepeatTask := true
+		}
+	} else if(selStage = "溶岩 04A-10 N") {
+		isRepeatTask := false
+		gosub Grind04A-10N
+		
+		if(!isRepeatTask) {
+			MsgBox, New Task
+			gosub Grind04A-10N  ; start from home page
+			isRepeatTask := true
+		} else {
+			gosub Continue04A-10N  ; start from stage selection page
+			isRepeatTask := true
+		}
+	}
+	
+} else {
+	; work is not done or is not ready to dispatch new work
+	MsgBox, switch is off, cannot dispatch
+}
+return
+
+
 BigSwitchOn:
 canRun := true
 return
 
 BigSwitchOff:
 canRun := false
-Reload
+isRepeatTask := false
+changeStatusText("Stopping...")
+;~ Reload
 return
 
 ForceClick:
@@ -197,62 +281,71 @@ findClick(mapView_03A)
 Sleep rWait
 
 gosub Continue03A-02N
+workDone := true
+return
+
+Grind04A-10N:
+;~ if (canRun != true) {
+	;~ return
+;~ } else {
+	;~ TrayTip,, Grinding 04A-10 N non-stop, 5
+;~ }
+
+startFromHome()
+Sleep 2000  ; wait for main page
+; TODO: use image search to determine
+
+rWait := NormalRand(0, stdWaitTime, 0)
+Sleep rWait
+
+; generate a random click wait time
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick(mapCampaign)
+Sleep rWait
+
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick(mapView_04A)
+Sleep rWait
+
+gosub Continue04A-10N
+
+TrayTip,, Falldown End, 5
 return
 
 
 Continue03A-02N:
-while(true) {
-	;~ Random, rWait, 1500.0, 4500.0
-	rWait := NormalRand(0, stdWaitTime, 0)
+;~ Random, rWait, 1500.0, 4500.0
+rWait := NormalRand(0, stdWaitTime, 0)
 
-	findClick(mapSel_03A02N)
-	Sleep rWait * 1000
-	
-	gosub AutoBattleProcess
-	
-	;~ findClick(orderReady)
-	;~ Sleep rWait * 1000
+findClick(mapSel_03A02N)
+Sleep rWait * 1000
 
-	;~ findClick(affirmReady)
+gosub AutoBattleProcess
+
+;~ if(canRun = true) {
+	;~ Sleep 1000
 	
-	;~ findClick(autoBattle)
-	
-	;~ findClick(resultBattleStats,,,true)
-	
-	;~ simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
-	; put it in find click?
-	
-	
-	;~ ; if useCoordDataOnly is true
-	;~ if (useCoordDataOnly) {  ; use coord data and time to operate
-		;~ Sleep stdLoadTime * 1000  ; to milliseconds
-		;~ switchView(autoBattle)
-		;~ countdown := 90
-		;~ while (countdown > 0) {
-			;~ countdown--
-			;~ Sleep 1000
-			;~ changeStatusText("counting down ... " + countdown)
-		;~ }
-	;~ } else {  ; use image search to determine phase
-		;~ autoBattle()
-		;~ Sleep 1000
-		
-		;~ checkBattleResult()
-		;~ changeStatusText("Waiting for battle result")
-		;~ ; check battle result
-	;~ }
+;~ } else {
+	;~ Reload
+;~ }
+return
 
 
-	;~ quickTapAnywhere()
+Continue04A-10N:
+;~ Random, rWait, 1500.0, 4500.0
+rWait := NormalRand(0, stdWaitTime, 0)
 
-	if(canRun = true) {
-		Sleep 1000
-		
-	} else {
-		;~ MsgBox, do not run again
-		Reload
-	}
-}
+findClick(mapSel_04A10N)
+Sleep rWait * 1000
+
+gosub AutoBattleProcess
+
+;~ if(canRun = true) {
+	;~ Sleep 1000
+	
+;~ } else {
+	;~ Reload
+;~ }
 
 ; Test line ends here
 return

@@ -18,13 +18,18 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 	global stdErrorRange
 	global WinSize 
 	global refreshPlayerData
+	global canRun
 	
 	yBorder = 36
 	
 	retryCount = 0
 	while(true) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return
+		}
 		
-		checkForError()
+		checkForError()  ; dealing with errors
 		
 		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
 
@@ -33,6 +38,13 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 		;~ msgbox, % pBitmapHayStack "," pBitmapNeedle
 	
 		result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
+		
+		; try freeing vars
+		Gdip_DisposeImage(pBitmapHayStack)
+		Gdip_DisposeImage(pBitmapNeedle)
+		
+		pBitmapHayStack := ""
+		pBitmapNeedle := ""
 		
 		
 		if (result = 1) {  ; image found
@@ -145,6 +157,10 @@ checkForError() {
 	; Check for RefreshPlayerData Error
 	pBitmapNeedle_refreshPlayerData := Gdip_CreateBitmapFromFile(refreshPlayerData["path"])
 	result_refreshPlayerData := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle_refreshPlayerData,OutputList,eX1,eY1,eX2,eY2,60,0,1,1)
+	
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapNeedle_refreshPlayerData)
+	
 	if (result_refreshPlayerData = 1) {  ; image found
 		resCoord := StrSplit(OutputList, ",")
 		x := resCoord[1]
@@ -185,6 +201,10 @@ checkForError() {
 	; Check for Network Error
 	pBitmapNeedle_networkError := Gdip_CreateBitmapFromFile(networkError["path"])
 	result_networkError := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle_networkError,OutputList,eX1,eY1,eX2,eY2,60,0,1,1)
+	
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapNeedle_networkError)
+	
 	if (result_networkError = 1) {  ; image found
 		resCoord := StrSplit(OutputList, ",")
 		x := resCoord[1]
@@ -225,6 +245,10 @@ checkForError() {
 	; Check for Connection Error
 	pBitmapNeedle_connectionError := Gdip_CreateBitmapFromFile(connectionError["path"])
 	result_connectionError := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle_connectionError,OutputList,eX1,eY1,eX2,eY2,60,0,1,1)
+	
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapNeedle_connectionError)
+	
 	if (result_connectionError = 1) {  ; image found
 		resCoord := StrSplit(OutputList, ",")
 		x := resCoord[1]
@@ -261,6 +285,10 @@ checkForError() {
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	}
+	
+	
+	; free bmp from handle to window
+	Gdip_DisposeImage(pBitmapHayStack)
 }
 
 
