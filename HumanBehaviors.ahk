@@ -44,6 +44,8 @@ getRandomBehavior() {
 			  
 		; do nothing at all, let the flow continue
 		return {name: "continue", pauseLength: 0}
+		; test
+		;~ return {name: "pause short", pauseLength: 30}
 	}
 }
 

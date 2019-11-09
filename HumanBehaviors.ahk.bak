@@ -43,7 +43,9 @@ getRandomBehavior() {
 			  ; maybe also add time specific behaviors, such as night mode
 			  
 		; do nothing at all, let the flow continue
-		return {name: "continue", pauseLength: 0}
+		;~ return {name: "continue", pauseLength: 0}
+		; test
+		return {name: "pause short", pauseLength: 30}
 	}
 }
 

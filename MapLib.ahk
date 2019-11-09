@@ -6,6 +6,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; import Gdip libs for image search
 #Include Gdip_All.ahk
 #Include Gdip_ImageSearch.ahk
+#Include HumanBehaviors.ahk
 
 ; Functions
 p := Gdip_Startup()
@@ -38,7 +39,12 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 			
 			if(viewObj["override"] != "") {
 				switch viewObj["override"] {
-					case "quick taps": quickTapAnywhere()
+					case "quick taps": 
+						if (canSimulateHumanBehavior) {
+							;~ MsgBox behavior!
+							simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
+						}
+						quickTapAnywhere()
 				}
 				return
 			}
@@ -84,11 +90,13 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 			tPause := NormalRand(0, stdWaitTime, 0)
 
 			GuiControl,, ClickPosIndicator, x = %xClick%`, y = %yClick%`, Action -> %act%, Click Time Offset -> %tPause%s
-			Sleep tPause * 1000
 			
-			if canSimulateHumanBehavior {
+			if (canSimulateHumanBehavior) {
+				;~ MsgBox behavior!
 				simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
 			}
+			
+			Sleep tPause * 1000
 			
 			ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 			
@@ -256,7 +264,7 @@ checkForError() {
 }
 
 
-switchView(viewName) {
+switchView(viewName) {  ; obsolete
 	; This function takes view data and find the corresponding position of the view on the screen and click it
 	; it currently only uses coordinate mode; it does not do any image search
 	; TODO:
