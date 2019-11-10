@@ -14,11 +14,11 @@ simulateRandomBehavior() {
 	behavior := getRandomBehavior()
 	baseLength := behavior["pauseLength"]
 	Random, fraction, 0.00, 1.00
-	fBehaviorLength := baseLength + (baseLength / 4) * fraction
+	fBehaviorLength := baseLength + (baseLength / 2) * fraction
 	
 	;~ MsgBox % "Triggered behavior: " behavior["name"] ", base pause time is " baseLength " seconds, processed pause time is " fBehaviorLength
 	
-	GuiControl,, ClickPosIndicator, % "Triggered behavior: " behavior["name"] ", base time " baseLength "s, processed pause time " fBehaviorLength "s"
+	GuiControl,, ClickPosIndicator, % "Triggered behavior: " behavior["name"] "`nBase time " baseLength "s`nProcessed pause time " fBehaviorLength "s"
 	
 	Sleep fBehaviorLength * 1000  ; to milliseconds1 / 60
 	
@@ -30,20 +30,20 @@ getRandomBehavior() {
 	; it returns enum object, and this object contains behavior name and break time
 	Random, hP, 0.00, 1.00  ; uniformly generate a number between 0 and 1
 	if (hP >= 0 && hP < 0.02) {  ; 2% rate to drink
-		return {name: "drink", pauseLength: 180}
+		return {name: "Drink", pauseLength: 180}
 	} else if (hP >= 0.02 && hP < 0.025) {  ; 0.5% rate to eat
-		return {name: "eat", pauseLength: 600}
+		return {name: "Snack", pauseLength: 600}
 	} else if (hP >= 0.025 && hP < 0.100) {  ; 7.5% rate to pause short
-		return {name: "pause short", pauseLength: 30}
+		return {name: "Rest Short", pauseLength: 30}
 	} else if (hP >= 0.100 && hP < 0.150) {  ; 5% rate to pause long
-		return {name: "pause long", pauseLength: 60}
+		return {name: "Rest Long", pauseLength: 60}
 	} else if (hP >= 0.150 && hP < 0.165) {  ; 1.5% rate to pause extremely long
-		return {name: "pause extreme", pauseLength: 90}
+		return {name: "Rest Very Long", pauseLength: 90}
 	} else {  ; 83.5% rate to continue grinding
 			  ; maybe also add time specific behaviors, such as night mode
 			  
 		; do nothing at all, let the flow continue
-		return {name: "continue", pauseLength: 0}
+		return {name: "Continue", pauseLength: 0}
 		; test
 		;~ return {name: "pause short", pauseLength: 30}
 	}

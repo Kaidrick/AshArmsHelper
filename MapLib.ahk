@@ -38,11 +38,23 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 
 		pBitmapNeedle := Gdip_CreateBitmapFromFile(viewObj["path"])
 
-		;~ msgbox, % pBitmapHayStack "," pBitmapNeedle
+		; TODO: consider search region if provided by the view object?
+		
+		; && viewObj["searchRegion"]["X1"] >= 0 && viewObj["searchRegion"]["Y1"] >= 0 && viewObj["searchRegion"]["X2"] >= 0 && viewObj["searchRegion"]["Y2"] >= 0
+		
+		if (viewObj["searchRegion"] != "" && viewObj["searchRegion"]["X1"] >= 0 && viewObj["searchRegion"]["Y1"] >= 0 && viewObj["searchRegion"]["X2"] >= 0 && viewObj["searchRegion"]["Y2"] >= 0) {
+			;~ MsgBox, search region data!
+			sX1 := viewObj["searchRegion"]["X1"]
+			sY1 := viewObj["searchRegion"]["Y1"] + yBorder
+			sX2 := viewObj["searchRegion"]["X2"]
+			sY2 := viewObj["searchRegion"]["Y2"] + yBorder
+			;~ MsgBox % sX1 sY1 sX2 sY2
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,sX1,sY1,sX2,sY2,60,0,1,1)
+		} else {  ; search region data is invalid or is not provided -> search full window
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
+		}
 	
-		; consider search region if provided by the view object?
-	
-		result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
+		;~ result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
 		
 		; try freeing vars
 		Gdip_DisposeImage(pBitmapHayStack)
@@ -53,7 +65,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 		
 		
 		if (result = 1) {  ; image found
-			
+			; Maybe refractor this to a clickOnFound?
 			if(viewObj["override"] != "") {
 				switch viewObj["override"] {
 					case "quick taps": 
@@ -102,25 +114,28 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 			yClick := y + hH + yOffset + yRand ;+ yBorder  ; maybe yBorder is not needed when using gdip? idk
 			act := viewObj["act"]
 			
+			changeStatusText("Searching for [" viewObj["path"] "]...success!")
+			
+			; first click then wait?
 			; random sleep
-			;~ Random, tPause, 0.0, 4.0
 			tPause := NormalRand(0, stdWaitTime, 0)
+			
+			ExecClick(act, xClick, yClick, tPause, canSimulateHumanBehavior)
 
-			GuiControl,, ClickPosIndicator, x = %xClick%`, y = %yClick%`, Action -> %act%, Click Time Offset -> %tPause%s
+			;~ GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
 			
-			if (canSimulateHumanBehavior) {
-				;~ MsgBox behavior!
-				simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
-			}
+			;~ if (canSimulateHumanBehavior) {
+				;~ simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
+			;~ }
 			
-			Sleep tPause * 1000
-			; check if stop condition met
-			if(!canRun) {
-				;~ MsgBox, cancelling
-				return
-			}
+			;~ Sleep tPause * 1000
+			;~ ; check if stop condition met
+			;~ if(!canRun) {
+				;~ ; MsgBox, cancelling
+				;~ return
+			;~ }
 			
-			ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
+			;~ ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 			
 			break
 		}
@@ -131,10 +146,9 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 		
 		if (retryCount >= abortCount) {
 			; abort
-			changeStatusText("Tries limit reached for " viewObj["path"] "...skip")
+			changeStatusText("Search limit reached for " viewObj["path"] "...skip")
 			return
 		}
-		
 		
 		; IMPORTANT: if unable to find target images after multiple iteration, maybe the draw need to be updated
 		; drag the screen a little bit, or go back to previous page to let the screen to be redraw
@@ -144,6 +158,8 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 
 
 checkForError() {
+	; TODO: three different images are searched. need this refractoring badly
+	
 	global asaGameHwnd
 	global ClickPosIndicator
 	global stdWaitTime
@@ -153,6 +169,8 @@ checkForError() {
 	global refreshPlayerData
 	global networkError
 	global connectionError
+	
+	global allData
 	
 	eX1 = 400
 	eY1 = 300
@@ -196,14 +214,13 @@ checkForError() {
 		yRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
 		
 		xClick := x + hW + xOffset + xRand
-		yClick := y + hH + yOffset + yRand ;+ yBorder  ; maybe yBorder is not needed when using gdip? idk
+		yClick := y + hH + yOffset + yRand ; + yBorder  ; maybe yBorder is not needed when using gdip? idk
 		act := viewObj["act"]
 		
 		; random sleep
-		;~ Random, tPause, 0.0, 4.0
 		tPause := NormalRand(0, stdWaitTime, 0)
 
-		GuiControl,, ClickPosIndicator, x = %xClick%`, y = %yClick%`, Action -> %act%, Click Time Offset -> %tPause%s
+		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
 		Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
@@ -229,7 +246,6 @@ checkForError() {
 		if (networkError["offset"]["x"] != "" && networkError["offset"]["y"] != "") {
 			xOffset := networkError["offset"]["x"]
 			yOffset := networkError["offset"]["y"]
-			;~ MsgBox, % xOffset ", " yOffset
 		} else {
 			xOffset = 0
 			yOffset = 0
@@ -244,10 +260,9 @@ checkForError() {
 		act := viewObj["act"]
 		
 		; random sleep
-		;~ Random, tPause, 0.0, 4.0
 		tPause := NormalRand(0, stdWaitTime, 0)
 
-		GuiControl,, ClickPosIndicator, x = %xClick%`, y = %yClick%`, Action -> %act%, Click Time Offset -> %tPause%s
+		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
 		Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
@@ -288,40 +303,19 @@ checkForError() {
 		act := viewObj["act"]
 		
 		; random sleep
-		;~ Random, tPause, 0.0, 4.0
 		tPause := NormalRand(0, stdWaitTime, 0)
 
-		GuiControl,, ClickPosIndicator, x = %xClick%`, y = %yClick%`, Action -> %act%, Click Time Offset -> %tPause%s
+		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
 		Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	}
-	
 	
 	; free bmp from handle to window
 	Gdip_DisposeImage(pBitmapHayStack)
 }
 
 
-switchView(viewName) {  ; obsolete
-	; This function takes view data and find the corresponding position of the view on the screen and click it
-	; it currently only uses coordinate mode; it does not do any image search
-	; TODO:
-	
-	global asaGameHwnd
-	global ClickPosIndicator
-	
-	; check if switch is valid, to-do
-	
-	clickData := getRandomClick(viewName, ClickPosIndicator)
-	xClick := clickData["x"]
-	yClick := clickData["y"]
-	
-	; apply random sleep
-	Sleep clickData["delay"] * 1000
-	
-	ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,,left
-}
 
 quickTapAnywhere(numClick=20) {
 	; generate some quick taps at random positions
@@ -378,7 +372,7 @@ quickTapAnywhere(numClick=20) {
 	}
 }
 
-getRandomClick(mapDataObj, clickPosIndicator) 
+getRandomClick(mapDataObj, clickPosIndicator)  ; OBSOLETE, but maybe useful for coord and time mode...
 {
 	global useCoordDataOnly  ; disable image search, use prepared coord only
 	global WinSize
@@ -448,101 +442,6 @@ getRandomClick(mapDataObj, clickPosIndicator)
 }
 
 
-autoBattle() {
-	global asaGameHwnd
-	global ClickPosIndicator
-	
-	yBorder := 36
-	
-	imgFile := "battleViewWithdraw.png"
-	imgWidth = 51
-	imgHeight = 33
-	
-	; region limit
-	x1 = 33
-	y1 = 21
-	x2 = 166
-	y2 = 67
-	
-	
-	retryCount := 0
-	while(true) {
-		; find withdraw image
-		;~ WinActivate, ahk_id %asaGameHwnd%
-		ImageSearch, imgX, imgY, x1, y1 + yBorder, x2, y2 + yBorder, *50 %imgFile%
-	
-		if(ErrorLevel = 0) {
-			; do clicks here then break while loop
-			hW := imgWidth / 2
-			hH := imgHeight / 2
-			
-			x := imgX + hW + 150  ; offset px to AUTO button
-			y := imgY + hH
-			act := "Auto ▷"
-			
-			; random sleep
-			Random, tPause, 0.0, 4.0
-			
-			; need to refractor this line
-			GuiControl,, ClickPosIndicator, x = %x%`, y = %y%`, Action -> %act%, Click Time Offset -> %tPause%s
-			
-			Sleep tPause * 1000
-			
-			ControlClick, x%x% y%y%, ahk_id %asaGameHwnd%,,left  ; do click
-			
-			break
-		}
-		
-		retryCount++
-		GuiControl,, WinSize, % "Image Not Found... re-try: " retryCount
-		
-		Sleep 500
-	}
-	
-	; offset click on auto
-}
-
-
-checkBattleResult() {
-	global asaGameHwnd
-	global ClickPosIndicator
-	
-	yBorder := 36
-	
-	imgFile := "resultBattleStats.png"
-	imgWidth = 98
-	imgHeight = 21
-	
-	; region limit
-	x1 = 1137
-	y1 = 413
-	x2 = 1252
-	y2 = 454
-	
-	retryCount := 0
-	while(true) {
-		; find battle result image
-		;~ WinActivate, ahk_id %asaGameHwnd%
-		ImageSearch, imgX, imgY, x1, y1 + yBorder, x2, y2 + yBorder, *5 %imgFile%
-	
-		if(ErrorLevel = 0) {
-			GuiControl,, WinSize, % "Battle Result Confirmed"
-			Sleep 1000
-			quickTapAnywhere()
-			
-			break
-		}
-		
-		retryCount++
-		GuiControl,, WinSize, % "Waiting For Battle Result... re-try: " retryCount
-		
-		Sleep 1000
-	}
-	
-	; offset click on auto
-}
-
-
 
 changeStatusText(currentStatus) {
 	global WinSize
@@ -551,56 +450,28 @@ changeStatusText(currentStatus) {
 	return
 }
 
-startFromHome() {
-	;~ global useCoordDataOnly  ; disable image search, use prepared coord only
-	global WinSize
-	global homeNode
-	global asaGameHwnd
-	global returnHomeButton
+ExecClick(actName, pX, pY, delay, canSimulateHumanBehavior) {
 	global ClickPosIndicator
+	global canRun
+	global asaGameHwnd
 	
-	yBorder := 36
+	GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%`nDelay: %delay%s
 	
-	imgFile := returnHomeButton["path"]
-	
-	retryCount := 0
-	while(true) {
-		WinActivate, ahk_id %asaGameHwnd%
-		ImageSearch, imgX, imgY, homeNode["x1"], homeNode["y1"] + yBorder, homeNode["x2"], homeNode["y2"] + yBorder, *50 %imgFile%
-		Sleep 200
-		
-		if(ErrorLevel = 0) {
-			; do clicks here then break while loop
-			hW := returnHomeButton["size"]["w"] / 2
-			hH := returnHomeButton["size"]["h"] / 2
-			
-			x := imgX + hW
-			y := imgY + hH
-			act := returnHomeButton["act"]
-			
-			; random sleep
-			Random, tPause, 0.0, 4.0
-			
-			; need to refractor this line
-			GuiControl,, ClickPosIndicator, x = %x%`, y = %y%`, Action -> %act%, Click Time Offset -> %tPause%s
-			
-			Sleep tPause * 1000
-			
-			ControlClick, x%x% y%y%, ahk_id %asaGameHwnd%,,left  ; do click
-			
-			return true
-		}
-		
-		retryCount++
-		GuiControl,, WinSize, % "Image Not Found... re-trying count: " + retryCount
-		
-		if(retryCount > 5) {
-			return false ; assert that game is already at home page
-		}
+	if (canSimulateHumanBehavior) {
+		simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
 	}
 	
+	Sleep delay * 1000
+	; check if stop condition met
+	if(!canRun) {
+		;~ MsgBox, cancelling
+		return
+	}
 	
+	ControlClick, x%pX% y%pY%, ahk_id %asaGameHwnd%,, left  ; do click
 }
+
+
 
 NormalRand(x,y,int=1) { ;x lower y upper int for integer return
 	Loop 12
@@ -611,8 +482,3 @@ NormalRand(x,y,int=1) { ;x lower y upper int for integer return
 	norm := (int) ? Round((y+x)/2+((Num-6)*(y-x))/6) : (y+x)/2+((Num-6)*(y-x))/6
 	Return norm < x ? x : norm > y ? y : norm
 }
-
-
-;~ QuickTaps:
-;~ quickTapAnywhere()
-;~ return

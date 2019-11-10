@@ -9,26 +9,23 @@ CoordMode, Pixel, Window
 #Include JSON.ahk
 
 ; To-do list
-; 1. make a basic click wait function
-; 2. add a timer
-; 3. add an GUI for user control
-; 4. add more map options such as 1-2(need new function) and 4-10 or so
-; 5. deals with errors
+; 1. deals with invalid auth after long idle time
+; 2. optional search region provided by json
+; 3. add the ability to use battle flow provided by json
 
 
-; General Image Search Ranges
-mapNodeSelection := {x1: 53, x2: 1203, y1: 300, y2: 420}
-homeNode := {x1: 1186, x2: 1261, y1: 20, y2: 89}
-
-; frequency
+; standard wait time
 stdWaitTime = 2.0
 stdLoadTime = 8.0
 
+; Emulator title height -> yBorder
+yBorder = 36  ; NemuPlayer
+
 ; Click error
-stdErrorRange = 12.0  ; px
+stdErrorRange = 12.0  ; max distance from the click point to the base point in px
 
 ; Create GUI control panel
-clickPos := "Current Click -> x = 0, y = 0"
+clickPos := "Click Position"
 workStatus := "Starting"
 winSize := "Target Window Size"
 statsRun := "Stats"
@@ -42,21 +39,21 @@ isRepeatTask := false
 useCoordDataOnly := false
 
 
-Gui, Add, Text, x5 y5 h14 w150 vWorkStatusIndicator, %workStatus%
+Gui, Add, Text, x5 y5 h14 w100 vWorkStatusIndicator, %workStatus%
 Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
-Gui, Add, Text, x5 y45 h14 w450 vClickPosIndicator, %clickPos%
-Gui, Add, Text, x400 y25 h14 w100 vRunNum, %statsRun%
+Gui, Add, Text, x5 y45 h48 w450 vClickPosIndicator, %clickPos%
+Gui, Add, Text, x400 y5 h14 w100 vRunNum, %statsRun%
 
 Gui, Show, w500 h200, % "アッシュアームズ自動管理システム"
 
-Gui, Add, Button, x5 y85 h20 w50 vMasterButton gMasterRoutine, % "Start"
-Gui, Add, Button, x5 y105 h20 w50 vStopButton gBigSwitchOff, % "Stop"
-Gui, Add, Button, x5 y125 h20 w50 gTapTap, % "Tap Fes!"
+Gui, Add, Button, x250 y125 h50 w50 vMasterButton gMasterRoutine, % "Start"
+Gui, Add, Button, x300 y125 h50 w50 vStopButton gBigSwitchOff, % "Stop"
+Gui, Add, Button, x445 y145 h50 w50 gTapTap, % "Test Function"
 
 ; map selection dropdown list
-Gui, Add, DropDownList, x250 y150 vStageChoice gOnStageSelect w100 h50 Choose2 R5, 遺跡 01-02|雪原 03A-02 N|溶岩 04A-10 N
+Gui, Add, DropDownList, x250 y100 vStageChoice gOnStageSelect w100 h50 Choose2 R5, 遺跡 01-02|雪原 03A-02 N|溶岩 04A-10 N
 
-Gui, Add, CheckBox, x5 y145 h20 w150 gForceClick, % "Coord mode for scale"
+Gui, Add, CheckBox, x5 y145 h20 w150 gForceClick, % "Silent Mode (Coord and Time only)"
 
 GuiControl,, ClickPosIndicator, % "Ready"
 GuiControl, Disable, StopButton
@@ -102,53 +99,9 @@ if (asaGameHwnd) {
 
 ; Data
 
-; Auto Play Wait Data
-mapData03A02N = {wait: 120} ; in seconds
-
-; IMPORTANT: notice that the image in the path is the anchor image
-;            an offset need to be provided to correct the click point
-;            if no offset is given, it will click on the center of the image itself
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;
-;; Campaign Map
-;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-mapCampaign := {x: 817, y: 252, path: "mainPage_CapaignMap.png", offset: {x: 0, y: -22}, size: {w: 145, h: 121}, act: "出撃"}
-;~ mapCampaign := {x: 535, y: 221, act: "出撃"} ; fake!
-
-; 03A Map
-mapView_01 := {x: 433, y: 272, path: "mapTheater_01.png", offset: {x: -13, y: 3}, size: {w: 45, h: 33}, act: "遺跡 「01」"}
-mapView_03A := {x: 475, y: 470, path: "mapTheater_03A.png", offset: {x: -13, y: 3}, size: {w: 51, h: 49}, act: "雪原 「03A」"}
-mapView_04A := {x: 855, y: 381, path: "mapTheater_04A.png", offset: {x: -13, y: 3}, size: {w: 49, h: 32}, act: "溶岩 「04A」"}
-
-; 03A-02 N
-; x y coordinates for backup mode, since it is impossible to deal with resized image? maybe prepare two versions of the images in different reoslution.
-mapSel_0102 := {x: 640, y: 416, path: "mapSel_01-02.png", type: "mapNodeSel", offset: {x: -98, y: 82}, size: {w: 96, h: 23}, act: "▶ 01-02"}
-mapSel_03A02N := {x: 640, y: 416, path: "mapSel_03A-02N.png", type: "mapNodeSel", offset: {x: -98, y: 82}, size: {w: 125, h: 27}, act: "▶ 03A-02 N"}
-mapSel_04A10N := {x: 640, y: 416, path: "mapSel_04A-10N.png", type: "mapNodeSel", offset: {x: -98, y: 82}, size: {w: 128, h: 24}, act: "▶ 04A-10 N"}
-
-
-
-; Go
-orderReady := {x: 1048, y: 654, path: "mapSel_OrderReady.png", offset: {x: 75, y: 48}, size: {w: 58, h: 64}, act: "ステージ情報 出撃"}
-; Confirm Go
-affirmReady := {x: 1041, y: 664, path: "preStage_Consumption.png", offset: {x: 382, y: -5}, size: {w: 26, h: 31}, act: "出撃準備 確認"}
-; Auto
-autoBattle := {x: 234, y: 42, path: "battleViewWithdraw.png", offset: {x: 158, y: 0}, size: {w: 51, h: 33}, act: "Auto ▷"}
-
-; BattleResult
-resultBattleStats := {x: 0, y: 0, path: "resultBattleStats.png", offset: {x: 0, y: 0}, size: {w: 0, h: 0}, act: "Battle Result Check", override: "quick taps"}
 
 ; TapTap
 tapAnywhere := {x: 642, y: 73, act: "Quick Taps"}  ; need xy data for different games, supposedly?
-
-; Back Button
-returnArrowButton := {x: 60, y: 40, act: "Return to Previous Page"}
-
-; Home Button
-returnHomeButton := {x: 1226, y: 50, path: "homePage.png", type: "returnHome", size: {w: 26, h: 30}, act: "Return Home Page"}
-
 
 ; Errors
 refreshPlayerData := {x: 0, y: 0, path: "Error_RefreshPlayerData.PNG", size: {w: 195, h: 40}, offset: {x: 167, y: 164}, act: "Deal RefreshPlayerData error"}
@@ -163,27 +116,13 @@ Gui, Submit, nohide
 selStage := StageChoice
 
 TrayTip,, Grinding Stage: %selStage%, 5
-MsgBox, %selStage%
+;~ MsgBox, %selStage%
 return
 
 
 
 ; Subroutines
 TapTap:
-;~ quickTapAnywhere()
-;~ startFromHome()
-;~ simulateRandomBehavior()
-;~ autoBattle()
-;~ checkBattleResult()
-;~ findClick(mapCampaign,,,true)
-;~ checkForError()
-;~ MsgBox, %MapChoice%
-;~ gosub BigSwitchOn
-
-; test json
-
-
-
 
 return
 
@@ -207,47 +146,6 @@ while(true) {
 }
 changeStatusText("Script stopped.")
 GuiControl, Enable, MasterButton
-
-;~ runCount = 0
-;~ gosub BigSwitchOn
-;~ while(true) {
-	;~ gosub CheckWorkStatus
-	
-	;~ ;MsgBox % canRun
-	;~ if(!canRun) {
-		;~ TrayTip,, Stop Stop Stop, 5
-		;~ break  ; the whole script should halt here
-	;~ }
-	;~ runCount++
-	;~ GuiControl,, RunNum, % "Round: " runCount
-;~ }
-;~ changeStatusText("Script stopped.")
-
-;~ TrayTip,, Stop Stop Stop, 5
-
-
-; use a timer to check if current work is done and if dispatcher is allowed to issue new work
-
-
-;~ if(selStage = "雪原 03A-02 N") {
-	;~ gosub Grind03A-02N
-;~ } else if(selStage = "溶岩 04A-10 N") {
-	;~ gosub Grind04A-10N
-;~ }
-
-;~ gosub Grind03A-02N
-
-;~ WinActivate, ahk_id %asaGameHwnd%
-;~ ImageSearch, imgX, imgY, mapNodeSelection["x1"], mapNodeSelection["y1"], mapNodeSelection["x2"], mapNodeSelection["y2"], *50 mapSel_03A-02N.png
-
-;~ if(ErrorLevel = 1) 
-;~ {
-	;~ TrayTip,,Image Not Found, 5
-;~ }
-;~ else if(ErrorLevel = 0) 
-;~ {
-	;~ TrayTip,,Image Found + %imgX% + %imgY%, 5
-;~ }
 return
 
 CheckWorkStatus:
@@ -291,12 +189,14 @@ canRun := true
 isRepeatTask := false
 GuiControl, Disable, MasterButton
 GuiControl, Enable, StopButton
+GuiControl, Disable, StageChoice
 return
 
 BigSwitchOff:
 canRun := false
 isRepeatTask := false
 GuiControl, Disable, StopButton
+GuiControl, Enable, StageChoice
 changeStatusText("Stopping...")
 ;~ Reload
 return
