@@ -6,6 +6,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 CoordMode, Pixel, Window
 
 #Include MapLib.ahk
+#Include JSON.ahk
 
 ; To-do list
 ; 1. make a basic click wait function
@@ -30,6 +31,7 @@ stdErrorRange = 12.0  ; px
 clickPos := "Current Click -> x = 0, y = 0"
 workStatus := "Starting"
 winSize := "Target Window Size"
+statsRun := "Stats"
 
 winResolutionWidth := 1280
 winResolutionHeight := 720
@@ -41,13 +43,14 @@ useCoordDataOnly := false
 
 
 Gui, Add, Text, x5 y5 h14 w150 vWorkStatusIndicator, %workStatus%
-Gui, Add, Text, x5 y25 h14 w150 vWinSize, %winSize%
+Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
 Gui, Add, Text, x5 y45 h14 w450 vClickPosIndicator, %clickPos%
+Gui, Add, Text, x400 y25 h14 w100 vRunNum, %statsRun%
 
 Gui, Show, w500 h200, % "アッシュアームズ自動管理システム"
 
-Gui, Add, Button, x5 y85 h20 w50 gTestFind, % "Start"
-Gui, Add, Button, x5 y105 h20 w50 gBigSwitchOff, % "Stop"
+Gui, Add, Button, x5 y85 h20 w50 vMasterButton gMasterRoutine, % "Start"
+Gui, Add, Button, x5 y105 h20 w50 vStopButton gBigSwitchOff, % "Stop"
 Gui, Add, Button, x5 y125 h20 w50 gTapTap, % "Tap Fes!"
 
 ; map selection dropdown list
@@ -56,11 +59,31 @@ Gui, Add, DropDownList, x250 y150 vStageChoice gOnStageSelect w100 h50 Choose2 R
 Gui, Add, CheckBox, x5 y145 h20 w150 gForceClick, % "Coord mode for scale"
 
 GuiControl,, ClickPosIndicator, % "Ready"
+GuiControl, Disable, StopButton
 
 
 ; Initialize
-; Selected Grinding Stage
-;~ gosub OnStageSelect
+selStage := "雪原 03A-02 N"
+; Load image data from json file and then merge into a singe object
+FileRead, generalJson, ImageSearchData.json
+FileRead, theaterJson, Map_TheaterData.json
+FileRead, nodeJson, Map_StageNodeData.json
+
+generalData := JSON.Load(generalJson)
+theaterData := JSON.Load(theaterJson)
+nodeData := JSON.Load(nodeJson)
+
+allData := {}
+for k, v in generalData
+	ObjRawSet(allData, k, v)
+
+for k, v in theaterData
+	ObjRawSet(allData, k, v)
+
+for k, v in nodeData
+	ObjRawSet(allData, k, v)
+
+
 
 ; try get window handle
 WinGet, asaGameHwnd, ID, アッシュアームズ - MuMu模拟器
@@ -96,7 +119,7 @@ mapCampaign := {x: 817, y: 252, path: "mainPage_CapaignMap.png", offset: {x: 0, 
 
 ; 03A Map
 mapView_01 := {x: 433, y: 272, path: "mapTheater_01.png", offset: {x: -13, y: 3}, size: {w: 45, h: 33}, act: "遺跡 「01」"}
-mapView_03A := {x: 475, y: 470, path: "mapTheater_03A.png", offset: {x: -13, y: 3}, size: {w: 50, h: 39}, act: "雪原 「03A」"}
+mapView_03A := {x: 475, y: 470, path: "mapTheater_03A.png", offset: {x: -13, y: 3}, size: {w: 51, h: 49}, act: "雪原 「03A」"}
 mapView_04A := {x: 855, y: 381, path: "mapTheater_04A.png", offset: {x: -13, y: 3}, size: {w: 49, h: 32}, act: "溶岩 「04A」"}
 
 ; 03A-02 N
@@ -118,7 +141,7 @@ autoBattle := {x: 234, y: 42, path: "battleViewWithdraw.png", offset: {x: 158, y
 resultBattleStats := {x: 0, y: 0, path: "resultBattleStats.png", offset: {x: 0, y: 0}, size: {w: 0, h: 0}, act: "Battle Result Check", override: "quick taps"}
 
 ; TapTap
-tapAnywhere := {x: 642, y: 73, act: "Quick Taps"}
+tapAnywhere := {x: 642, y: 73, act: "Quick Taps"}  ; need xy data for different games, supposedly?
 
 ; Back Button
 returnArrowButton := {x: 60, y: 40, act: "Return to Previous Page"}
@@ -129,8 +152,8 @@ returnHomeButton := {x: 1226, y: 50, path: "homePage.png", type: "returnHome", s
 
 ; Errors
 refreshPlayerData := {x: 0, y: 0, path: "Error_RefreshPlayerData.PNG", size: {w: 195, h: 40}, offset: {x: 167, y: 164}, act: "Deal RefreshPlayerData error"}
-networkError := {x: 0, y: 0, path: "Error_NetWork.PNG", size: {w: 208, h: 36}, offset: {x: 167, y: 164}, act: "Deal RefreshPlayerData error"}
-connectionError := {x: 0, y: 0, path: "Error_Connection.png", size: {w: 247, h: 38}, offset: {x: 258, y: 165}, act: "Deal RefreshPlayerData error"}
+networkError := {x: 0, y: 0, path: "Error_NetWork.PNG", size: {w: 208, h: 36}, offset: {x: 167, y: 164}, act: "Deal Network error"}
+connectionError := {x: 0, y: 0, path: "Error_Connection.png", size: {w: 247, h: 38}, offset: {x: 258, y: 165}, act: "Deal Connection error"}
 return
 
 
@@ -138,7 +161,9 @@ return
 OnStageSelect:
 Gui, Submit, nohide
 selStage := StageChoice
+
 TrayTip,, Grinding Stage: %selStage%, 5
+MsgBox, %selStage%
 return
 
 
@@ -153,12 +178,22 @@ TapTap:
 ;~ findClick(mapCampaign,,,true)
 ;~ checkForError()
 ;~ MsgBox, %MapChoice%
-gosub BigSwitchOn
+;~ gosub BigSwitchOn
+
+; test json
+
+
+
+
 return
 
 
-TestFind:
-;~ gosub BigSwitchOn
+MasterRoutine:
+runCount = 0
+GuiControl,, RunNum, % "Round: " runCount
+
+; run the process
+gosub BigSwitchOn
 while(true) {
 	gosub CheckWorkStatus
 	
@@ -166,11 +201,27 @@ while(true) {
 	if(!canRun) {
 		TrayTip,, Stop Stop Stop, 5
 		break  ; the whole script should halt here
-	} else {
-		TrayTip,, go go go, 5
 	}
+	runCount++
+	GuiControl,, RunNum, % "Round: " runCount
 }
 changeStatusText("Script stopped.")
+GuiControl, Enable, MasterButton
+
+;~ runCount = 0
+;~ gosub BigSwitchOn
+;~ while(true) {
+	;~ gosub CheckWorkStatus
+	
+	;~ ;MsgBox % canRun
+	;~ if(!canRun) {
+		;~ TrayTip,, Stop Stop Stop, 5
+		;~ break  ; the whole script should halt here
+	;~ }
+	;~ runCount++
+	;~ GuiControl,, RunNum, % "Round: " runCount
+;~ }
+;~ changeStatusText("Script stopped.")
 
 ;~ TrayTip,, Stop Stop Stop, 5
 
@@ -209,7 +260,8 @@ if(canRun) {
 	; find the selected work at the moment
 	if(selStage = "雪原 03A-02 N") {
 		if(!isRepeatTask) {
-			MsgBox, New Task
+			;~ MsgBox, New Task
+			changeStatusText("Dispatch new task: " + selStage)
 			gosub Grind03A-02N  ; start from home page
 			isRepeatTask := true
 		} else {
@@ -217,11 +269,8 @@ if(canRun) {
 			isRepeatTask := true
 		}
 	} else if(selStage = "溶岩 04A-10 N") {
-		isRepeatTask := false
-		gosub Grind04A-10N
-		
 		if(!isRepeatTask) {
-			MsgBox, New Task
+			changeStatusText("Dispatch new task: " + selStage)
 			gosub Grind04A-10N  ; start from home page
 			isRepeatTask := true
 		} else {
@@ -239,11 +288,15 @@ return
 
 BigSwitchOn:
 canRun := true
+isRepeatTask := false
+GuiControl, Disable, MasterButton
+GuiControl, Enable, StopButton
 return
 
 BigSwitchOff:
 canRun := false
 isRepeatTask := false
+GuiControl, Disable, StopButton
 changeStatusText("Stopping...")
 ;~ Reload
 return
@@ -256,13 +309,9 @@ if (useCoordDataOnly = true) {
 }
 
 Grind03A-02N:
-if (canRun != true) {
-	return
-} else {
-	TrayTip,, Grinding 03A-02 N non-stop, 5
-}
 
-startFromHome()
+;~ startFromHome()
+findClick("returnHomeButton", 5)
 Sleep 2000  ; wait for main page
 ; TODO: use image search to determine
 
@@ -271,12 +320,12 @@ Sleep rWait
 
 ; generate a random click wait time
 rWait := NormalRand(0, stdWaitTime, 0)
-findClick(mapCampaign)
+findClick("mapCampaign")
 ;~ switchView(mapCampaign)
 Sleep rWait
 
 rWait := NormalRand(0, stdWaitTime, 0)
-findClick(mapView_03A)
+findClick("mapView_03A")
 ;~ switchView(mapView03A)
 Sleep rWait
 
@@ -285,26 +334,22 @@ workDone := true
 return
 
 Grind04A-10N:
-;~ if (canRun != true) {
-	;~ return
-;~ } else {
-	;~ TrayTip,, Grinding 04A-10 N non-stop, 5
-;~ }
 
-startFromHome()
+;~ startFromHome()
+findClick("returnHomeButton", 5)
 Sleep 2000  ; wait for main page
 ; TODO: use image search to determine
-
+ 
 rWait := NormalRand(0, stdWaitTime, 0)
 Sleep rWait
 
 ; generate a random click wait time
 rWait := NormalRand(0, stdWaitTime, 0)
-findClick(mapCampaign)
+findClick("mapCampaign")
 Sleep rWait
 
 rWait := NormalRand(0, stdWaitTime, 0)
-findClick(mapView_04A)
+findClick("mapView_04A")
 Sleep rWait
 
 gosub Continue04A-10N
@@ -317,17 +362,11 @@ Continue03A-02N:
 ;~ Random, rWait, 1500.0, 4500.0
 rWait := NormalRand(0, stdWaitTime, 0)
 
-findClick(mapSel_03A02N)
+findClick("mapSel_03A02N")
 Sleep rWait * 1000
 
 gosub AutoBattleProcess
 
-;~ if(canRun = true) {
-	;~ Sleep 1000
-	
-;~ } else {
-	;~ Reload
-;~ }
 return
 
 
@@ -335,28 +374,20 @@ Continue04A-10N:
 ;~ Random, rWait, 1500.0, 4500.0
 rWait := NormalRand(0, stdWaitTime, 0)
 
-findClick(mapSel_04A10N)
+findClick("mapSel_04A10N")
 Sleep rWait * 1000
 
 gosub AutoBattleProcess
 
-;~ if(canRun = true) {
-	;~ Sleep 1000
-	
-;~ } else {
-	;~ Reload
-;~ }
-
-; Test line ends here
 return
 
 
 
 AutoBattleProcess:
-findClick(orderReady)
-findClick(affirmReady)
-findClick(autoBattle)
-findClick(resultBattleStats,,,true)
+findClick("orderReady")
+findClick("affirmReady")
+findClick("autoBattle")
+findClick("resultBattleStats",,,true)
 return
 
 

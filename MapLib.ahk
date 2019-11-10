@@ -11,7 +11,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; Functions
 p := Gdip_Startup()
 
-findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=false) {
+findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavior=false) {
 	global asaGameHwnd
 	global ClickPosIndicator
 	global stdWaitTime
@@ -19,8 +19,11 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 	global WinSize 
 	global refreshPlayerData
 	global canRun
+	global allData
 	
 	yBorder = 36
+	
+	viewObj := allData[viewObjName]
 	
 	retryCount = 0
 	while(true) {
@@ -36,6 +39,8 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 		pBitmapNeedle := Gdip_CreateBitmapFromFile(viewObj["path"])
 
 		;~ msgbox, % pBitmapHayStack "," pBitmapNeedle
+	
+		; consider search region if provided by the view object?
 	
 		result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
 		
@@ -109,6 +114,11 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 			}
 			
 			Sleep tPause * 1000
+			; check if stop condition met
+			if(!canRun) {
+				;~ MsgBox, cancelling
+				return
+			}
 			
 			ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 			
@@ -116,12 +126,13 @@ findClick(viewObj, abortCount=500, waitInterval=500, canSimulateHumanBehavior=fa
 		}
 		
 		retryCount++
-		GuiControl,, WinSize, % "Fail to find, retry:" retryCount
+		GuiControl,, WinSize, % "Searching for [" viewObj["path"] "], iters:" retryCount
 		Sleep waitInterval
 		
 		if (retryCount >= abortCount) {
 			; abort
-			MsgBox, Huston, we have a problem!
+			changeStatusText("Tries limit reached for " viewObj["path"] "...skip")
+			return
 		}
 		
 		
@@ -312,13 +323,14 @@ switchView(viewName) {  ; obsolete
 	ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,,left
 }
 
-quickTapAnywhere(numClick=10) {
+quickTapAnywhere(numClick=20) {
 	; generate some quick taps at random positions
 	; usually used in after battle stats page
 	
 	global asaGameHwnd        ; Handle to emulator window
 	global ClickPosIndicator  ; next click position
 	global WinSize            ; status bar
+	global allData            ; click data
 	
 	yBorder := 36 ; constant border px
 	
@@ -352,7 +364,7 @@ quickTapAnywhere(numClick=10) {
 		xRand := fRadius * cos(fAngle)
 		yRand := fRadius * sin(fAngle)
 		
-		Random, rT, 0.0, 0.5 ; random time interval
+		Random, rT, 0.0, 0.25 ; random time interval
 		
 		xClick := xBase + xRand
 		yClick := yBase + yRand + yBorder

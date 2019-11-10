@@ -1,0 +1,38 @@
+﻿{
+	"mapView_01": {
+		"x": 433, "y": 272, 
+		"path": "mapTheater_01.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 45, "h": 33
+		}, 
+		"act": "遺跡 「01」"
+	},
+	
+	"mapView_03A": {
+		"x": 475, "y": 470, 
+		"path": "mapTheater_03A.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 51, "h": 49
+		}, 
+		"act": "雪原 「03A」"
+	},
+	
+	"mapView_04A": {
+		"x": 855, "y": 381, 
+		"path": "mapTheater_04A.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 49, "h": 32
+		}, 
+		"act": "溶岩 「04A」"
+	}
+}
+
