@@ -1,3 +1,8 @@
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+; #Warn  ; Enable warnings to assist with detecting common errors.
+SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+
 ; Simulated Human Behaviors
 simulateRandomBehavior() {
 	; This function is used to simulate human behavior such as bio break or afk
@@ -10,6 +15,7 @@ simulateRandomBehavior() {
 	global WinSize
 	global asaGameHwnd
 	global ClickPosIndicator
+	global canRun
 	
 	behavior := getRandomBehavior()
 	baseLength := behavior["pauseLength"]
@@ -20,8 +26,26 @@ simulateRandomBehavior() {
 	
 	GuiControl,, ClickPosIndicator, % "Triggered behavior: " behavior["name"] "`nBase time " baseLength "s`nProcessed pause time " fBehaviorLength "s"
 	
-	Sleep fBehaviorLength * 1000  ; to milliseconds1 / 60
+	;~ Sleep fBehaviorLength * 1000  ; to milliseconds1 / 60
 	
+	tRest := StrSplit(fBehaviorLength, ".")  ; for example 234.474453
+	ptInt := tRest[1]
+	ptDeci := fBehaviorLength - ptInt
+	
+	;~ MsgBox % ptInt " | " ptDeci
+	
+	ptCount = 0
+	while(ptCount < ptInt) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return
+		}
+		Sleep 1000
+		
+		ptCount++  ; increment
+	}
+	Sleep ptDeci * 1000
+
 	return
 }
 

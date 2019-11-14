@@ -1,0 +1,20 @@
+SELECT,1,Select the 1st unit
+MOVE,3,Move selected unit to Line 3
+DESELECT,,Deselect current unit
+BATTLE,,Start turn
+WAIT,5000,Wait 5000ms
+SELECT,1,Select the 1st unit
+MOVE,5,Move selected unit to Line 5
+DESELECT,,Deselected current unit
+BATTLE,,Start turn
+WAIT,5000,Wait 5000ms
+SELECT,1,Select the 1st unit
+SKILL,1,Assign the 1st skill
+DESELECT,,Deselect current unit
+BATTLE,,Start tunr
+WAIT,5000,Wait 5000ms
+SELECT,1,Select the 1st unit
+MOVE,7,Move selected unit to Line 7
+SKILL,1,Assign the 1st skill
+DESELECT,,Deselect current unit
+BATTLE,,Start turn

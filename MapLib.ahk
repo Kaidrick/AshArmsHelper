@@ -7,6 +7,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #Include Gdip_All.ahk
 #Include Gdip_ImageSearch.ahk
 #Include HumanBehaviors.ahk
+#Include AshArmsHelper.ahk
+#Include FlowExec.ahk
 
 ; Functions
 p := Gdip_Startup()
@@ -33,6 +35,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 		}
 		
 		checkForError()  ; dealing with errors
+		checkLoginOnBadAuth()  ; dealing with login problems
 		
 		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
 
@@ -73,7 +76,12 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 							;~ MsgBox behavior!
 							simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
 						}
-						quickTapAnywhere()
+						; after possible sleep
+						if(canRun) {
+							quickTapAnywhere()
+						} else {
+							return
+						}
 				}
 				return
 			}
@@ -157,8 +165,176 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 }
 
 
+existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTryAllowed=5) {
+	global asaGameHwnd
+	global canRun
+
+	yBorder = 36
+	
+	iters = 0
+	
+	while(true) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return false
+		}
+		
+		checkForError()  ; dealing with errors
+		
+		if(hasEarlyResult()) {
+			return
+		}
+		
+		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+		pBitmapNeedle := Gdip_CreateBitmapFromFile(imgPath)
+		
+		if (L_x1 >= 0 && L_y1 >= 0 && L_x2 >= 0 && L_y2 >= 0) {
+			;~ MsgBox, search region data!
+			sX1 := L_x1
+			sY1 := L_y1 + yBorder
+			sX2 := L_x2
+			sY2 := L_y2 + yBorder
+			
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,sX1,sY1,sX2,sY2,60,0,1,1)
+		} else {  ; search region data is invalid or is not provided -> search full window
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
+		}
+
+		; try freeing vars
+		Gdip_DisposeImage(pBitmapHayStack)
+		Gdip_DisposeImage(pBitmapNeedle)
+		
+		pBitmapHayStack := ""
+		pBitmapNeedle := ""
+		
+		if (result = 1) {  ; image found
+			;~ MsgBox, img found!
+			return true
+		}
+		
+		if(numTryAllowed > 0 && iters > numTryAllowed) {
+			;~ MsgBox, out of allowance
+			return false ; try allowance reached
+		} ; else if numTryAllowed < 0 or = 0, then do nothing and let the loop run unlimitedly until image is found
+		
+		iters++
+		
+		Sleep waitInterval
+		; IMPORTANT: if unable to find target images after multiple iteration, maybe the draw need to be updated
+		; drag the screen a little bit, or go back to previous page to let the screen to be redraw
+		
+	}
+}
+
+; if numTryAllowed is 0, then allow unlimited try
+notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTryAllowed=5) {
+	global asaGameHwnd
+	global canRun
+
+	yBorder = 36
+	
+	iters = 0
+	assertCount = 0
+	notFound = true
+	
+	
+	while(true) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return
+		}
+		
+		checkForError()  ; dealing with errors
+		
+		if(hasEarlyResult()) {
+			return
+		}
+		
+		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+		pBitmapNeedle := Gdip_CreateBitmapFromFile(imgPath)
+		
+		if (L_x1 >= 0 && L_y1 >= 0 && L_x2 >= 0 && L_y2 >= 0) {
+			;~ MsgBox, search region data!
+			sX1 := L_x1
+			sY1 := L_y1 + yBorder
+			sX2 := L_x2
+			sY2 := L_y2 + yBorder
+			
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,sX1,sY1,sX2,sY2,60,0,1,1)
+		} else {  ; search region data is invalid or is not provided -> search full window
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
+		}
+
+		; try freeing vars
+		Gdip_DisposeImage(pBitmapHayStack)
+		Gdip_DisposeImage(pBitmapNeedle)
+		
+		pBitmapHayStack := ""
+		pBitmapNeedle := ""
+		
+		if (result = 0) {  ; image not found
+			assertCount++
+			
+			; if numTryAllowed is not given, then loop 5 times and assert
+			; otherwise loop numTryAllowed times then assert no such image and return true
+			
+			if (assertCount >= numTryAllowed) {
+				; assert not found
+				;~ MsgBox, assert not exist!
+				return true
+			}
+		}  ; else image is still present in the window, try again
+		
+		Sleep waitInterval
+		; IMPORTANT: if unable to find target images after multiple iteration, maybe the draw need to be updated
+		; drag the screen a little bit, or go back to previous page to let the screen to be redraw
+		
+	}
+}
+
+
+hasEarlyResult() {  ; if battle is ended earlier than expected
+	; check win in every loop
+	; if result image is found then switch early termination
+	global asaGameHwnd
+	global canRun
+	
+	if(!canRun) {
+		;~ MsgBox, cancelling
+		return
+	}
+	
+	yBorder = 36
+	
+	retryCount = 0
+	
+	pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+	
+	; Check for resultBattleStats.png
+	pBitmapNeedle := Gdip_CreateBitmapFromFile("resultBattleStats.png")
+	
+	sX1 := 1136
+	sY1 := 417 + yBorder
+	sX2 := 1248
+	sY2 := 450 + yBorder
+	
+	result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,sX1,sY1,sX2,sY2,60,0,1,1)
+	;~ result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,60,0,1,1)
+	
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapNeedle)
+	Gdip_DisposeImage(pBitmapHayStack)
+	
+	if (result = 1) {  ; image found
+		return true
+	} else {
+		return false
+	}
+}
+
+
 checkForError() {
-	; TODO: three different images are searched. need this refractoring badly
+	; TODO: three different images are searched. need refractoring badly
 	
 	global asaGameHwnd
 	global ClickPosIndicator
@@ -171,6 +347,11 @@ checkForError() {
 	global connectionError
 	
 	global allData
+	
+	if(!canRun) {
+		;~ MsgBox, cancelling
+		return
+	}
 	
 	eX1 = 400
 	eY1 = 300
@@ -221,7 +402,7 @@ checkForError() {
 		tPause := NormalRand(0, stdWaitTime, 0)
 
 		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
-		Sleep tPause * 1000
+		;~ Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	}
@@ -263,7 +444,7 @@ checkForError() {
 		tPause := NormalRand(0, stdWaitTime, 0)
 
 		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
-		Sleep tPause * 1000
+		;~ Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	}
@@ -306,7 +487,7 @@ checkForError() {
 		tPause := NormalRand(0, stdWaitTime, 0)
 
 		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
-		Sleep tPause * 1000
+		;~ Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	}
@@ -314,6 +495,72 @@ checkForError() {
 	; free bmp from handle to window
 	Gdip_DisposeImage(pBitmapHayStack)
 }
+
+
+
+; check for kicked error -> bad auth
+checkLoginOnBadAuth() {
+	global canRun
+	global canRestart
+	; check for associate data with account option image in the lower right corner
+	; if found, click a few times to login
+	
+	if(!canRun) {
+		;~ MsgBox, cancelling
+		return
+	}
+	
+	badAuth := existImage("loginView_associateAccount.png", 1045, 584, 1216, 653, 50, 1)
+	
+	if (badAuth) {
+		changeStatusText("Auth expired. Try to re-login...")
+		Sleep 2000
+		quickTapAnywhere(1)
+		; check for login success
+		existImage("loginView_mailSupport.png", 1042, 577, 1212, 646, 50, 0)  ; must see
+		changeStatusText("Login Success")
+		; after mail support icon is found, click on screen to go to the home page
+		quickTapAnywhere(1)
+		
+		Sleep 5000
+		
+		checkForError()
+		
+		; check if notice board -> check if 出撃 button is visible
+		while(true) {
+			found := existImage("mainPage_CapaignMap.png",,,,,,1)
+			
+			if(!found) {  ; if image cannot be found, click on blank area and try finding the image again
+				coordClick(61, 338)
+				Sleep 5000
+				; check for return to last page button
+				back := existImage("previousPage.png",,,,,,1)
+				if(back) {
+					findClick("returnHomeButton")
+				}
+			} else {  ; if image can be found, break loop and continue
+				break
+			}
+		}
+		
+		; TODO !!!
+		; set canRestart and canRun
+		changeStatusText("Restarting the script run...")
+		Sleep 2000
+		
+		BigSwitchOff()
+		
+		;~ canRun = false  ; stop the script
+		canRestart = true  ; set the script to be restarted when reaching the end
+	} 
+	
+	return
+	; what if this is the first login of the day? then need to click on blank area to skip event data
+	; check if 出撃 button is visible, if so, restart the whole script
+	; set canRun to false and let the script fall down to the end until it totally stops
+	; modify the main routine so that if a canRestart variable is set to true, then it will automatically reset canRun to true and continue to run from
+}
+
 
 
 
@@ -376,7 +623,6 @@ getRandomClick(mapDataObj, clickPosIndicator)  ; OBSOLETE, but maybe useful for 
 {
 	global useCoordDataOnly  ; disable image search, use prepared coord only
 	global WinSize
-	global mapNodeSelection
 	global asaGameHwnd       ; handle to window
 	global stdWaitTime       ; standard wait time
 	global stdErrorRange     ; limit of click offset

@@ -18,6 +18,25 @@
 		"type": "mapNodeSel"
 	},
 	
+	"mapSel_0106": {
+		"x": 640, "y": 416, 
+		"path": "mapSel_01-06.png", 
+		"offset": {
+			"x": -98, "y": 82
+		}, 
+		"size": {
+			"w": 96, "h": 23
+		}, 
+		"searchRegion": {
+			"X1": 53,
+			"Y1": 300,
+			"X2": 1203,
+			"Y2": 420
+		},
+		"act": "▶ 01-06",
+		"type": "mapNodeSel"
+	},
+	
 	"mapSel_03A02N": {
 		"x": 475, "y": 470, 
 		"path": "mapSel_03A-02N.png", 
@@ -53,6 +72,25 @@
 			"Y2": 420
 		},
 		"act": "▶ 04A-10 N",
+		"type": "mapNodeSel"
+	},
+	
+	"mapSel_05A02N": {
+		"x": 742, "y": 328, 
+		"path": "mapSel_05A-02N.png", 
+		"offset": {
+			"x": -98, "y": 82
+		}, 
+		"size": {
+			"w": 123, "h": 23
+		}, 
+		"searchRegion": {
+			"X1": 53,
+			"Y1": 300,
+			"X2": 1203,
+			"Y2": 420
+		},
+		"act": "▶ 05A-02 N",
 		"type": "mapNodeSel"
 	}
 }

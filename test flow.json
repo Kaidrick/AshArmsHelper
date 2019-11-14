@@ -1,0 +1,43 @@
+﻿[
+	{
+		"action": "select",
+		"args": 1,
+		"desc": "Select first member in the team"
+	},
+	
+	{
+		"action": "move",
+		"args": 1,
+		"desc": "Move the selected member to grid 3"
+	},
+	
+	{
+		"action": "switch",
+		"args": 1,
+		"desc": "Switch to High Alt"
+	},
+	
+	{
+		"action": "skill",
+		"args": 3,
+		"desc": "Assign the 3rd skill to be used in this turn"
+	},
+	
+	{
+		"action": "battle",
+		"args": -1,
+		"desc": "Assign the 3rd skill to be used in this turn"
+	},
+	
+	{
+		"action": "wait",
+		"args": 1000,
+		"desc": "Sleep for 1000 ms"
+	},
+
+	{
+		"action": "ifFound",
+		"args": "some test image.png",
+		"desc": "Do not go to next action until this image has been found in the window?"
+	}
+]
