@@ -3,6 +3,10 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
+
+#Include MapLib.ahk
+
+
 ; Simulated Human Behaviors
 simulateRandomBehavior() {
 	; This function is used to simulate human behavior such as bio break or afk
@@ -16,6 +20,26 @@ simulateRandomBehavior() {
 	global asaGameHwnd
 	global ClickPosIndicator
 	global canRun
+	global runCount
+	global longSessionBreak
+	
+	; if longSessionBreak is true, sleep 4 hours after 60 runs
+	if (longSessionBreak) {
+		
+		if (runCount > 0 && Mod(runCount, 60) = 0) {  ; if runCount % 60 == 0, that is, runCount is 60 or 120 or 180...
+			changeStatusText("Long Sleep...")
+			tElapsed = 0
+			while(true) {
+				Sleep 1000
+				tElapsed++  ; sleep 4 hours to simulate sleep, need more work
+				changeStatusText("Long Sleep..." tElapsed "s elapsed")
+				if(tElapsed > 3600) { 
+					break
+				}
+			}
+		}
+	}
+	
 	
 	behavior := getRandomBehavior()
 	baseLength := behavior["pauseLength"]
@@ -32,7 +56,7 @@ simulateRandomBehavior() {
 	ptInt := tRest[1]
 	ptDeci := fBehaviorLength - ptInt
 	
-	MsgBox % ptInt " | " ptDeci
+	;~ MsgBox % ptInt " | " ptDeci
 	
 	ptCount = 0
 	while(ptCount < ptInt) {
@@ -63,6 +87,8 @@ getRandomBehavior() {
 		return {name: "Rest Long", pauseLength: 60}
 	} else if (hP >= 0.150 && hP < 0.165) {  ; 1.5% rate to pause extremely long
 		return {name: "Rest Very Long", pauseLength: 90}
+	} else if (hP >= 0.165 && hP < 0.170) {  ; 0.5 rate to short sleep
+		return {name: "Short Sleep", pauseLength: 1800}
 	} else {  ; 83.5% rate to continue grinding
 			  ; maybe also add time specific behaviors, such as night mode
 			  

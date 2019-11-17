@@ -234,6 +234,15 @@ battleView_CheckWin() {
 }
 
 
+battleView_Auto() {
+	existImage("battleViewWithdraw.png",,,,,,0)  ; must see
+	if(hasEarlyResult()) {
+		return
+	}
+	coordClick(1052, 343)
+}
+
+
 
 
 coordClick(x, y) {

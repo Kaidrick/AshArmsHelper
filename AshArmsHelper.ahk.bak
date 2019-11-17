@@ -43,8 +43,11 @@ canRestart := false
 isRepeatTask := false
 useCoordDataOnly := false
 
+; User options
+longSessionBreak := false
 
-Gui, Add, Text, x5 y5 h14 w100 vWorkStatusIndicator, %workStatus%
+
+Gui, Add, Text, x5 y5 h14 w150 vWorkStatusIndicator, %workStatus%
 Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
 Gui, Add, Text, x5 y45 h48 w450 vClickPosIndicator, %clickPos%
 Gui, Add, Text, x400 y5 h14 w100 vRunNum, %statsRun%
@@ -56,7 +59,7 @@ Gui, Add, Button, x300 y125 h50 w50 vStopButton gBigSwitchOff, % "Stop"
 Gui, Add, Button, x445 y145 h50 w50 gTapTap, % "Test Function"
 
 ; map selection dropdown list
-Gui, Add, DropDownList, x250 y100 vStageChoice gOnStageSelect w100 h50 Choose2 R5, 遺跡 01-06 (Manual)|雪原 03A-02 N|雪原 03A-02 N (Manual)|溶岩 04A-10 N|溶岩 04A-10 N (Manual)|森丘 05A-02 N (Manual)
+Gui, Add, DropDownList, x250 y100 vStageChoice gOnStageSelect w100 h50 Choose2 R5, 遺跡 01-06 (Manual)|雪原 03A-02 N|雪原 03A-02 N (Manual)|雪原 03A-08 N (Manual)|雪原 03A-10 N (Manual)|溶岩 04A-10 N|溶岩 04A-10 N (Manual)|森丘 05A-02 N (Manual)|——————————————————|溶岩奥地 04B-08 N (Manual)
 
 
 ; add as per file
@@ -69,12 +72,15 @@ Loop %path% {
 Gui, Add, DropDownList, x350 y100 vStageChoiceNew w100 h50 Choose1 R5, %files%
 
 Gui, Add, CheckBox, x5 y145 h20 w150 gForceClick, % "Silent Mode (Coord and Time only)"
+Gui, Add, Checkbox, x5 y165 h20 w200 gLongSession, % "Sleep Session (Allow long break)"
 
 GuiControl,, ClickPosIndicator, % "Ready"
 GuiControl, Disable, StopButton
 
 
 ; Initialize
+runCount = 0
+
 selStage := "雪原 03A-02 N"
 ; Load image data from json file and then merge into a singe object
 FileRead, generalJson, ImageSearchData.json
@@ -141,7 +147,9 @@ return
 ; Subroutines
 TapTap:
 canRun = true
-
+checkLoginOnBadAuth()
+;~ notExistImage("battleView_BattleStart.png")
+;~ MsgBox % what
 ;~ checkLoginOnBadAuth()
 
 ;~ MsgBox % hasEarlyResult()
@@ -245,7 +253,25 @@ if(canRun) {
 		} else {
 			gosub Continue03A-02N-Manual  ; start from stage selection page
 			isRepeatTask := true
-		}
+		} 
+	} else if (selStage = "雪原 03A-08 N (Manual)") {
+		if(!isRepeatTask) {
+			changeStatusText("Dispatch new task: " + selStage)
+			gosub Grind03A-08N-Manual  ; start from home page
+			isRepeatTask := true
+		} else {
+			gosub Continue03A-08N-Manual  ; start from stage selection page
+			isRepeatTask := true
+		} 
+	} else if (selStage = "雪原 03A-10 N (Manual)") {
+		if(!isRepeatTask) {
+			changeStatusText("Dispatch new task: " + selStage)
+			gosub Grind03A-10N-Manual  ; start from home page
+			isRepeatTask := true
+		} else {
+			gosub Continue03A-10N-Manual  ; start from stage selection page
+			isRepeatTask := true
+		} 
 	} else if(selStage = "溶岩 04A-10 N (Manual)") {
 		if(!isRepeatTask) {
 			changeStatusText("Dispatch new task: " + selStage)
@@ -262,6 +288,15 @@ if(canRun) {
 			isRepeatTask := true
 		} else {
 			gosub Continue05A-02N-Manual  ; start from stage selection page
+			isRepeatTask := true
+		}
+	} else if(selStage = "溶岩奥地 04B-08 N (Manual)") {
+		if(!isRepeatTask) {
+			changeStatusText("Dispatch new task: " + selStage)
+			gosub Grind04B-08N-Manual  ; start from home page
+			isRepeatTask := true
+		} else {
+			gosub Continue04B-08N-Manual  ; start from stage selection page
 			isRepeatTask := true
 		}
 	}
@@ -317,19 +352,94 @@ if (useCoordDataOnly = true) {
 } else {
 	useCoordDataOnly := true
 }
+return
+
+LongSession:
+if (longSessionBreak) {
+	longSessionBreak := false
+} else {
+	longSessionBreak := true
+}
+return
 
 
-Grind01-06-Manual:
+
+GrindStart:
 findClick("returnHomeButton", 5)
 Sleep 2000  ; wait for main page
-
-rWait := NormalRand(0, stdWaitTime, 0)
-Sleep rWait
 
 ; generate a random click wait time
 rWait := NormalRand(0, stdWaitTime, 0)
 findClick("mapCampaign")
 Sleep rWait
+
+
+; determine which theatre and which stage to go?
+; search files with name
+
+
+return
+
+
+
+Grind03A-10N-Manual:
+gosub GrindStart
+
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick("mapView_03A")
+Sleep rWait
+
+gosub Continue03A-10N-Manual
+workDone := true
+return
+
+Continue03A-10N-Manual:
+findClick("mapSel_03A10N")
+Sleep 500
+findClick("orderReady")
+Sleep 500
+findClick("affirmReady")
+
+path := A_ScriptDir "\data\flow\03A-10 N.txt"
+executeFlow(path)
+
+findClick("resultBattleStats",,,true)
+return
+
+
+
+
+
+
+Grind03A-08N-Manual:
+gosub GrindStart
+
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick("mapView_03A")
+Sleep rWait
+
+gosub Continue03A-08N-Manual
+workDone := true
+return
+
+Continue03A-08N-Manual:
+findClick("mapSel_03A08N")
+Sleep 500
+findClick("orderReady")
+Sleep 500
+findClick("affirmReady")
+
+path := A_ScriptDir "\data\flow\03A-08 N.txt"
+executeFlow(path)
+
+findClick("resultBattleStats",,,true)
+return
+
+
+
+
+Grind01-06-Manual:
+gosub GrindStart
 
 rWait := NormalRand(0, stdWaitTime, 0)
 findClick("mapView_01")
@@ -355,20 +465,7 @@ return
 
 
 Grind03A-02N:
-
-;~ startFromHome()
-findClick("returnHomeButton", 5)
-Sleep 2000  ; wait for main page
-; TODO: use image search to determine
-
-rWait := NormalRand(0, stdWaitTime, 0)
-Sleep rWait
-
-; generate a random click wait time
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapCampaign")
-;~ switchView(mapCampaign)
-Sleep rWait
+gosub GrindStart
 
 rWait := NormalRand(0, stdWaitTime, 0)
 findClick("mapView_03A")
@@ -382,8 +479,8 @@ return
 
 
 Grind03A-02N-Manual:
-findClick("returnHomeButton", 5)
-findClick("mapCampaign")
+gosub GrindStart
+
 findClick("mapView_03A")
 gosub Continue03A-02N-Manual
 workDone := true
@@ -406,19 +503,7 @@ return
 
 
 Grind04A-10N:
-
-;~ startFromHome()
-findClick("returnHomeButton", 5)
-Sleep 2000  ; wait for main page
-; TODO: use image search to determine
- 
-rWait := NormalRand(0, stdWaitTime, 0)
-Sleep rWait
-
-; generate a random click wait time
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapCampaign")
-Sleep rWait
+gosub GrindStart
 
 rWait := NormalRand(0, stdWaitTime, 0)
 findClick("mapView_04A")
@@ -455,13 +540,7 @@ return
 
 
 Grind04A-10N-Manual:
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("returnHomeButton", 5)
-Sleep rWait
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapCampaign")
-Sleep rWait
+gosub GrindStart
 
 rWait := NormalRand(0, stdWaitTime, 0)
 findClick("mapView_04A")
@@ -488,13 +567,7 @@ return
 
 
 Grind05A-02N-Manual:
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("returnHomeButton", 5)
-Sleep rWait
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapCampaign")
-Sleep rWait
+gosub GrindStart
 
 rWait := NormalRand(0, stdWaitTime, 0)
 findClick("mapView_05A")
@@ -518,6 +591,31 @@ executeFlow(path)
 findClick("resultBattleStats",,,true)
 return
 
+
+Grind04B-08N-Manual:
+gosub GrindStart
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick("mapView_04B")
+Sleep rWait
+
+gosub Continue04B-08N-Manual
+workDone := true
+
+return
+
+
+Continue04B-08N-Manual:
+Sleep 1000
+findClick("mapSel_04B08N")
+Sleep 1000
+findClick("orderReady")
+findClick("affirmReady")
+
+path := A_ScriptDir "\data\flow\04B-08 N.txt"
+executeFlow(path)
+
+findClick("resultBattleStats",,,true)
+return
 
 
 AutoBattleProcess:

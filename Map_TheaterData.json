@@ -53,6 +53,24 @@
 		"act": "溶岩 「04A」"
 	},
 	
+	"mapView_04B": {
+		"x": 855, "y": 381, 
+		"path": "mapTheater_04B.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 49, "h": 32
+		}, 
+		"searchRegion": {
+			"X1": 936,
+			"Y1": 242,
+			"X2": 1074,
+			"Y2": 335
+		},
+		"act": "溶岩奥地 「04B」"
+	},
+	
 	"mapView_05A": {
 		"x": 855, "y": 381, 
 		"path": "mapTheater_05A.png", 

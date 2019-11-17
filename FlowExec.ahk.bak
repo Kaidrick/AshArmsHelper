@@ -50,6 +50,8 @@ executeFlow(flowName) {
 	}
 	
 	GuiControl,, WinSize, % "Finished predefined battle flow"
+	
+	return
 }
 
 
@@ -229,6 +231,15 @@ battleView_CheckWin() {
 		earlyTermination = true  ; and skip to deal with result
 		MsgBox, animation done
 	}
+}
+
+
+battleView_Auto() {
+	existImage("battleView_ConfirmTurn.png",,,,,,0)  ; must see
+	if(hasEarlyResult()) {
+		return
+	}
+	coordClick(1052, 343)
 }
 
 

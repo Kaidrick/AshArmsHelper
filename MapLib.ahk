@@ -345,6 +345,7 @@ checkForError() {
 	global refreshPlayerData
 	global networkError
 	global connectionError
+	global canRun
 	
 	global allData
 	
@@ -405,6 +406,9 @@ checkForError() {
 		;~ Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
+		
+		; sleep a while and let the game continue to run
+		Sleep 2000
 	}
 	
 	; Check for Network Error
@@ -437,7 +441,7 @@ checkForError() {
 		yRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
 		
 		xClick := x + hW + xOffset + xRand
-		yClick := y + hH + yOffset + yRand ;+ yBorder  ; maybe yBorder is not needed when using gdip? idk
+		yClick := y + hH + yOffset + yRand ; + yBorder  ; maybe yBorder is not needed when using gdip? idk
 		act := viewObj["act"]
 		
 		; random sleep
@@ -447,6 +451,9 @@ checkForError() {
 		;~ Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
+		
+		; sleep a while and let the game continue to run
+		Sleep 2000
 	}
 	
 	; Check for Connection Error
@@ -480,7 +487,7 @@ checkForError() {
 		yRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
 		
 		xClick := x + hW + xOffset + xRand
-		yClick := y + hH + yOffset + yRand ;+ yBorder  ; maybe yBorder is not needed when using gdip? idk
+		yClick := y + hH + yOffset + yRand ; + yBorder  ; maybe yBorder is not needed when using gdip? idk
 		act := viewObj["act"]
 		
 		; random sleep
@@ -490,6 +497,9 @@ checkForError() {
 		;~ Sleep tPause * 1000
 		
 		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
+		
+		; sleep a while and let the game continue to run
+		Sleep 2000
 	}
 	
 	; free bmp from handle to window
