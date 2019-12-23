@@ -52,24 +52,27 @@ Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
 Gui, Add, Text, x5 y45 h48 w450 vClickPosIndicator, %clickPos%
 Gui, Add, Text, x400 y5 h14 w100 vRunNum, %statsRun%
 
-Gui, Show, w500 h200, % "アッシュアームズ自動管理システム"
+Gui, Show, w500 h500, % "アッシュアームズ自動管理システム"
 
 Gui, Add, Button, x250 y125 h50 w50 vMasterButton gMasterRoutine, % "Start"
 Gui, Add, Button, x300 y125 h50 w50 vStopButton gBigSwitchOff, % "Stop"
 Gui, Add, Button, x445 y145 h50 w50 gTapTap, % "Test Function"
 
+Gui, Add, Text, x5 y200 h170 w450 vStageInstruction, % "Select a stage from the droplist"
+
 ; map selection dropdown list
-Gui, Add, DropDownList, x250 y100 vStageChoice gOnStageSelect w100 h50 Choose2 R5, 遺跡 01-06 (Manual)|雪原 03A-02 N|雪原 03A-02 N (Manual)|雪原 03A-08 N (Manual)|雪原 03A-10 N (Manual)|溶岩 04A-10 N|溶岩 04A-10 N (Manual)|森丘 05A-02 N (Manual)|——————————————————|溶岩奥地 04B-08 N (Manual)
+;~ Gui, Add, DropDownList, x250 y100 vStageChoice gOnStageSelect w200 h50 Choose2 R5, 遺跡 01-06 (Manual)|雪原 03A-02 N|雪原 03A-02 N (Manual)|雪原 03A-06 N (ランカ/Pe-2/Ju87/SBD)|雪原 03A-08 N (Manual)|雪原 03A-10 N (Manual)|溶岩 04A-10 N|溶岩 04A-10 N (Manual)|森丘 05A-02 N (Manual)|——————————————————|雪原奥地 03B-04 N (SDB碎片)|雪原奥地 03B-06 N (兰开碎片/矿)|溶岩奥地 04B-08 N (KV-1碎片)
 
 
 ; add as per file
 path := A_ScriptDir "\data\flow\*.txt"
 files =
 Loop %path% {
-	files = %files% | %A_LoopFileName%
+	stdName := StrSplit(A_LoopFileName, ".")[1]
+	files = %files% | %stdName%
 }
 
-Gui, Add, DropDownList, x350 y100 vStageChoiceNew w100 h50 Choose1 R5, %files%
+Gui, Add, DropDownList, x250 y100 vStageChoiceNew gOnStageSelectNew w200 h50 Choose1 R5, %files%
 
 Gui, Add, CheckBox, x5 y145 h20 w150 gForceClick, % "Silent Mode (Coord and Time only)"
 Gui, Add, Checkbox, x5 y165 h20 w200 gLongSession, % "Sleep Session (Allow long break)"
@@ -82,6 +85,7 @@ GuiControl, Disable, StopButton
 runCount = 0
 
 selStage := "雪原 03A-02 N"
+selStageNew := ""
 ; Load image data from json file and then merge into a singe object
 FileRead, generalJson, ImageSearchData.json
 FileRead, theaterJson, Map_TheaterData.json
@@ -128,8 +132,13 @@ tapAnywhere := {x: 642, y: 73, act: "Quick Taps"}  ; need xy data for different 
 
 ; Errors
 refreshPlayerData := {x: 0, y: 0, path: "Error_RefreshPlayerData.PNG", size: {w: 195, h: 40}, offset: {x: 167, y: 164}, act: "Deal RefreshPlayerData error"}
+updatePlayerData := {x: 0, y: 0, path: "Error_UpdatePlayerData.PNG", size: {w: 196, h: 37}, offset: {x: 167, y: 164}, act: "Deal UpdatePlayerData error"}
 networkError := {x: 0, y: 0, path: "Error_NetWork.PNG", size: {w: 208, h: 36}, offset: {x: 167, y: 164}, act: "Deal Network error"}
 connectionError := {x: 0, y: 0, path: "Error_Connection.png", size: {w: 247, h: 38}, offset: {x: 258, y: 165}, act: "Deal Connection error"}
+battleCmdError := {x: 0, y: 0, path: "Error_BattleCmd.png", size: {w: 113, h: 30}, offset: {x: 208, y: 165}, act: "Deal Battle Cmd Error"}
+
+errorConfirmButton := {x: 0, y: 0, path: "Error_ConfirmButton.png", size: {w: 203, h: 75}, offset: {x: 0, y: 0}, act: "General Error Handling"}
+
 return
 
 
@@ -142,12 +151,47 @@ TrayTip,, Grinding Stage: %selStage%, 5
 ;~ MsgBox, %selStage%
 return
 
+OnStageSelectNew:
+Gui, Submit, nohide
+selStageNew := StageChoiceNew
+
+TrayTip,, Grinding Stage: %selStageNew%, 5
+
+
+selStageName := trim(selStageNew)
+path := A_ScriptDir "\data\flow\" selStageName ".txt"
+
+FileReadLine, descInfo, %path%, 2
+descInfo := StrSplit(descInfo, ",")
+pos1 := descInfo[2]
+pos2 := descInfo[3]
+pos3 := descInfo[4]
+pos4 := descInfo[5]
+pos5 := descInfo[6]
+pos6 := descInfo[7]
+pos7 := descInfo[8]
+pos8 := descInfo[9]
+
+drop1 := descInfo[10]
+drop2 := descInfo[11]
+drop3 := descInfo[12]
+drop4 := descInfo[13]
+drop5 := descInfo[14]
+drop6 := descInfo[15]
+
+GuiControl,, StageInstruction, Team Composition:`nA: [1]%pos1%`t [2]%pos2%`t [3]%pos3%`t [4]%pos4%`nG: [1]%pos5%`t [2]%pos6%`t [3]%pos7%`t [4]%pos8%`n----------------`nDrops: `n%drop1% [25`%]`n%drop2% [10`%]`n%drop3% [6`%]`n%drop4% [2.5`%]`n----------------`nRare Drops:`n%drop5% [10`%]`n%drop6% [1`%]
+
+return
+
 
 
 ; Subroutines
 TapTap:
-canRun = true
-checkLoginOnBadAuth()
+canRun := true
+handleGeneralError()
+;~ quickTapAnywhere()
+;~ canRun = true
+;~ checkLoginOnBadAuth()
 ;~ notExistImage("battleView_BattleStart.png")
 ;~ MsgBox % what
 ;~ checkLoginOnBadAuth()
@@ -215,91 +259,78 @@ CheckWorkStatus:
 ; 3. whenever canRun is false, stop
 if(canRun) {
 	; work is done and big switch is on; we can dispatch new work
-	; find the selected work at the moment
-	if(selStage = "遺跡 01-06 (Manual)") {
-		if(!isRepeatTask) {
-			;~ MsgBox, New Task
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind01-06-Manual  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue01-06-Manual  ; start from stage selection page
-			isRepeatTask := true
-		}
-	} else if(selStage = "雪原 03A-02 N") {
-		if(!isRepeatTask) {
-			;~ MsgBox, New Task
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind03A-02N  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue03A-02N  ; start from stage selection page
-			isRepeatTask := true
-		}
-	} else if(selStage = "溶岩 04A-10 N") {
-		if(!isRepeatTask) {
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind04A-10N  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue04A-10N  ; start from stage selection page
-			isRepeatTask := true
-		}
-	} else if(selStage = "雪原 03A-02 N (Manual)") {
-		if(!isRepeatTask) {
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind03A-02N-Manual  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue03A-02N-Manual  ; start from stage selection page
-			isRepeatTask := true
-		} 
-	} else if (selStage = "雪原 03A-08 N (Manual)") {
-		if(!isRepeatTask) {
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind03A-08N-Manual  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue03A-08N-Manual  ; start from stage selection page
-			isRepeatTask := true
-		} 
-	} else if (selStage = "雪原 03A-10 N (Manual)") {
-		if(!isRepeatTask) {
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind03A-10N-Manual  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue03A-10N-Manual  ; start from stage selection page
-			isRepeatTask := true
-		} 
-	} else if(selStage = "溶岩 04A-10 N (Manual)") {
-		if(!isRepeatTask) {
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind04A-10N-Manual  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue04A-10N-Manual  ; start from stage selection page
-			isRepeatTask := true
-		}
-	} else if(selStage = "森丘 05A-02 N (Manual)") {
-		if(!isRepeatTask) {
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind05A-02N-Manual  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue05A-02N-Manual  ; start from stage selection page
-			isRepeatTask := true
-		}
-	} else if(selStage = "溶岩奥地 04B-08 N (Manual)") {
-		if(!isRepeatTask) {
-			changeStatusText("Dispatch new task: " + selStage)
-			gosub Grind04B-08N-Manual  ; start from home page
-			isRepeatTask := true
-		} else {
-			gosub Continue04B-08N-Manual  ; start from stage selection page
-			isRepeatTask := true
-		}
+	
+	;~ read from selected flow file
+	selStageName := trim(selStageNew)
+	path := A_ScriptDir "\data\flow\" selStageName ".txt"
+	
+	FileReadLine, stageInfo, %path%, 1
+	stageInfo := StrSplit(stageInfo, ",")
+	theaterSel := stageInfo[2]
+	mapNodeSel := stageInfo[3]
+	mapDifficulty := stageInfo[4]
+	
+	mapTheaterKeyName := "mapView_" theaterSel
+	mapNodeKeyName := "mapSel_" theaterSel mapNodeSel mapDifficulty
+	
+	if(!isRepeatTask) {
+		;~ MsgBox, New Task
+		changeStatusText("Dispatch new task: " + selStageName)
+		gosub GrindStart  ; start from home page
+
+		rWait := NormalRand(0, stdWaitTime, 0)
+
+		findClick(mapTheaterKeyName)
+		Sleep rWait
+		
+		findClick(mapNodeKeyName)
+		Sleep 2000
+		findClick("orderReady")
+		Sleep 2000
+		findClick("affirmReady")
+
+		executeFlow(path)
+
+		findClick("resultBattleStats",,,true)
+		
+		workDone := true
+		
+		isRepeatTask := true
+	} else {
+		;~ start from result page
+		findClick("repeatStageFromBattleResult")
+		Sleep 3000
+		findClick("affirmReady")
+
+		executeFlow(path)
+
+		findClick("resultBattleStats",,,true)
+		
+		workDone := true
+		isRepeatTask := true
 	}
+	
+	;~ gosub GrindStart
+
+	;~ rWait := NormalRand(0, stdWaitTime, 0)
+	;~ MsgBox, find click map theater now
+	;~ findClick(mapTheaterKeyName)
+	;~ Sleep rWait
+	
+	;~ findClick(mapNodeKeyName)
+	;~ Sleep 500
+	;~ findClick("orderReady")
+	;~ Sleep 500
+	;~ findClick("affirmReady")
+
+	;~ executeFlow(path)
+
+	;~ findClick("resultBattleStats",,,true)
+	
+	;~ workDone := true
+	
+
+
 
 } else {
 	; work is not done or is not ready to dispatch new work
@@ -616,6 +647,83 @@ executeFlow(path)
 
 findClick("resultBattleStats",,,true)
 return
+
+
+
+Grind03B-04N-Manual:
+gosub GrindStart
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick("mapView_03B")
+Sleep rWait
+
+gosub Continue03B-04N-Manual
+workDone := true
+
+return
+
+continue03B-04N-Manual:
+Sleep 1000
+findClick("mapSel_03B04N")
+Sleep 1000
+findClick("orderReady")
+findClick("affirmReady")
+
+path := A_ScriptDir "\data\flow\03B-04 N.txt"
+executeFlow(path)
+
+findClick("resultBattleStats",,,true)
+return
+
+
+Grind03B-06N-Manual:
+gosub GrindStart
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick("mapView_03B")
+Sleep rWait
+
+gosub Continue03B-06N-Manual
+workDone := true
+
+return
+
+continue03B-06N-Manual:
+Sleep 1000
+findClick("mapSel_03B06N")
+Sleep 1000
+findClick("orderReady")
+findClick("affirmReady")
+
+path := A_ScriptDir "\data\flow\03B-06 N.txt"
+executeFlow(path)
+
+findClick("resultBattleStats",,,true)
+return
+
+
+Grind03A-06N-Manual:
+gosub GrindStart
+rWait := NormalRand(0, stdWaitTime, 0)
+findClick("mapView_03A")
+Sleep rWait
+
+gosub Continue03A-06N-Manual
+workDone := true
+
+return
+
+continue03A-06N-Manual:
+Sleep 1000
+findClick("mapSel_03A06N")
+Sleep 1000
+findClick("orderReady")
+findClick("affirmReady")
+
+path := A_ScriptDir "\data\flow\03A-06 N.txt"
+executeFlow(path)
+
+findClick("resultBattleStats",,,true)
+return
+
 
 
 AutoBattleProcess:

@@ -17,6 +17,42 @@
 		"act": "遺跡 「01」"
 	},
 	
+	"mapView_02A": {
+		"x": 649, "y": 165, 
+		"path": "mapTheater_02A.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 52, "h": 39
+		}, 
+		"searchRegion": {
+			"X1": 579,
+			"Y1": 119,
+			"X2": 716,
+			"Y2": 211
+		},
+		"act": "砂漠 「02A」"
+	},
+	
+	"mapView_02B": {
+		"x": 649, "y": 165, 
+		"path": "mapTheater_02B.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 49, "h": 39
+		}, 
+		"searchRegion": {
+			"X1": 753,
+			"Y1": 125,
+			"X2": 889,
+			"Y2": 211
+		},
+		"act": "砂漠奥地 「02B」"
+	},
+	
 	"mapView_03A": {
 		"x": 475, "y": 470, 
 		"path": "mapTheater_03A.png", 
@@ -33,6 +69,24 @@
 			"Y2": 512
 		},
 		"act": "雪原 「03A」"
+	},
+	
+	"mapView_03B": {
+		"x": 475, "y": 470, 
+		"path": "mapTheater_03B.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 51, "h": 49
+		}, 
+		"searchRegion": {
+			"X1": 551,
+			"Y1": 503,
+			"X2": 689,
+			"Y2": 593
+		},
+		"act": "雪原奥地 「03B」"
 	},
 	
 	"mapView_04A": {
@@ -87,6 +141,24 @@
 			"Y2": 619
 		},
 		"act": "森丘 「05A」"
+	},
+	
+	"mapView_05B": {
+		"x": 855, "y": 381, 
+		"path": "mapTheater_05B.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 49, "h": 39
+		},
+		"searchRegion": {
+			"X1": 966,
+			"Y1": 517,
+			"X2": 1100,
+			"Y2": 604
+		},
+		"act": "深い森丘 「05B」"
 	}
 }
 

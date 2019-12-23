@@ -34,7 +34,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 			return
 		}
 		
-		checkForError()  ; dealing with errors
+		handleGeneralError()  ; dealing with errors
 		checkLoginOnBadAuth()  ; dealing with login problems
 		
 		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
@@ -179,7 +179,7 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 			return false
 		}
 		
-		checkForError()  ; dealing with errors
+		handleGeneralError()  ; dealing with errors
 		
 		if(hasEarlyResult()) {
 			return
@@ -244,7 +244,7 @@ notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, num
 			return
 		}
 		
-		checkForError()  ; dealing with errors
+		handleGeneralError()  ; dealing with errors
 		
 		if(hasEarlyResult()) {
 			return
@@ -333,6 +333,87 @@ hasEarlyResult() {  ; if battle is ended earlier than expected
 }
 
 
+handleGeneralError() {
+	global asaGameHwnd
+	global ClickPosIndicator
+	global stdWaitTime
+	global stdErrorRange
+	global WinSize 
+	
+	global errorConfirmButton
+	global canRun
+	
+	global allData
+	
+	; as long as an error is prompted, click on confirm button, and then check whether the script needs to be restarted (need to re-login)
+	
+	if(!canRun) {
+		;~ MsgBox, cancelling
+		return
+	}
+	
+	yBorder = 36
+	
+	eX1 := 373
+	eY1 := 430 + yBorder
+	eX2 := 902
+	eY2 := 531 + yBorder
+	
+	retryCount = 0
+	
+	pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+	
+	; Check for RefreshPlayerData Error
+	pBitmapNeedle_errorConfirmButton := Gdip_CreateBitmapFromFile(errorConfirmButton["path"])
+	result_errorConfirmButton := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle_errorConfirmButton,OutputList,eX1,eY1,eX2,eY2,60,0,1,1)
+	
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapNeedle_errorConfirmButton)
+	
+	if(result_errorConfirmButton = 1) {
+		resCoord := StrSplit(OutputList, ",")
+		x := resCoord[1]
+		y := resCoord[2]
+		
+		; get image center, need to know width and height
+		hW := errorConfirmButton["size"]["w"] / 2
+		hH := errorConfirmButton["size"]["h"] / 2
+		
+		; if an offset is provided, add offset to the final coord value
+		if (errorConfirmButton["offset"]["x"] != "" && errorConfirmButton["offset"]["y"] != "") {
+			xOffset := errorConfirmButton["offset"]["x"]
+			yOffset := errorConfirmButton["offset"]["y"]
+			;~ MsgBox, % xOffset ", " yOffset
+		} else {
+			xOffset = 0
+			yOffset = 0
+		}
+		
+		; generate random click position offset
+		xRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
+		yRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
+		
+		xClick := x + hW + xOffset + xRand
+		yClick := y + hH + yOffset + yRand ; + yBorder  ; maybe yBorder is not needed when using gdip? idk
+		act := viewObj["act"]
+		
+		; random sleep
+		tPause := NormalRand(0, stdWaitTime, 0)
+
+		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
+		;~ Sleep tPause * 1000
+		
+		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
+		
+		; sleep a while and let the game continue to run
+		Sleep 2000
+	}
+	
+	; free bmp from handle to window
+	Gdip_DisposeImage(pBitmapHayStack)
+}
+
+
 checkForError() {
 	; TODO: three different images are searched. need refractoring badly
 	
@@ -385,6 +466,52 @@ checkForError() {
 		if (refreshPlayerData["offset"]["x"] != "" && refreshPlayerData["offset"]["y"] != "") {
 			xOffset := refreshPlayerData["offset"]["x"]
 			yOffset := refreshPlayerData["offset"]["y"]
+			;~ MsgBox, % xOffset ", " yOffset
+		} else {
+			xOffset = 0
+			yOffset = 0
+		}
+		
+		; generate random click position offset
+		xRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
+		yRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
+		
+		xClick := x + hW + xOffset + xRand
+		yClick := y + hH + yOffset + yRand ; + yBorder  ; maybe yBorder is not needed when using gdip? idk
+		act := viewObj["act"]
+		
+		; random sleep
+		tPause := NormalRand(0, stdWaitTime, 0)
+
+		GuiControl,, ClickPosIndicator, Action: %act%`nX: %xClick% / Y: %yClick%`nClick Delay: %tPause%s
+		;~ Sleep tPause * 1000
+		
+		ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
+		
+		; sleep a while and let the game continue to run
+		Sleep 2000
+	}
+	
+	; Check for UpdatePlayerData Error
+	pBitmapNeedle_updatePlayerData := Gdip_CreateBitmapFromFile(updatePlayerData["path"])
+	result_updatePlayerData := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle_updatePlayerData,OutputList,eX1,eY1,eX2,eY2,60,0,1,1)
+	
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapNeedle_updatePlayerData)
+	
+	if (result_updatePlayerData = 1) {  ; image found
+		resCoord := StrSplit(OutputList, ",")
+		x := resCoord[1]
+		y := resCoord[2]
+		
+		; get image center, need to know width and height
+		hW := updatePlayerData["size"]["w"] / 2
+		hH := updatePlayerData["size"]["h"] / 2
+		
+		; if an offset is provided, add offset to the final coord value
+		if (updatePlayerData["offset"]["x"] != "" && updatePlayerData["offset"]["y"] != "") {
+			xOffset := updatePlayerData["offset"]["x"]
+			yOffset := updatePlayerData["offset"]["y"]
 			;~ MsgBox, % xOffset ", " yOffset
 		} else {
 			xOffset = 0
@@ -526,6 +653,17 @@ checkLoginOnBadAuth() {
 		changeStatusText("Auth expired. Try to re-login...")
 		Sleep 2000
 		quickTapAnywhere(1)
+		
+		while(true) {
+			Sleep 2000
+			recheckBadAuth := existImage("loginView_associateAccount.png", 1045, 584, 1216, 653, 50, 1)
+			if (recheckBadAuth) {
+				quickTapAnywhere(1)
+			} else {
+				break
+			}
+		}
+		
 		; check for login success
 		existImage("loginView_mailSupport.png", 1042, 577, 1212, 646, 50, 0)  ; must see
 		changeStatusText("Login Success")
@@ -534,7 +672,7 @@ checkLoginOnBadAuth() {
 		
 		Sleep 5000
 		
-		checkForError()
+		handleGeneralError()
 		
 		; check if notice board -> check if 出撃 button is visible
 		while(true) {
@@ -589,8 +727,8 @@ quickTapAnywhere(numClick=20) {
 	;~ Random, xBase, 562.0, 1000.0
 	;~ Random, yBase, 570.0, 670.0
 	
-	xBase := NormalRand(562, 1000, 0)
-	yBase := NormalRand(570, 670, 0)
+	xBase := NormalRand(1086, 1239, 0)
+	yBase := NormalRand(96, 565, 0)
 	
 	; TODO: chances to get large offset, 2% percent?
 	

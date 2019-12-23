@@ -1,3 +1,5 @@
+INFO,04A,10,N
+DESC,
 SELECT,1,Select the 1st unit
 MOVE,3,Move selected unit to Line 3
 DESELECT,,Deselect current unit

@@ -25,8 +25,12 @@ executeFlow(flowName) {
 	{
 		Loop, parse, A_LoopReadLine, %A_Tab%
 		{
-			if (trim(A_LoopReadLine != "")) {
-				numLines++
+			if (trim(A_LoopReadLine) != "") {
+				dt := StrSplit(A_LoopField, ",")
+				action := dt[1]
+				if(action != "INFO" && action != "DESC") {
+					numLines++
+				}
 			}
 		}
 	}
@@ -35,16 +39,20 @@ executeFlow(flowName) {
 	{
 		Loop, parse, A_LoopReadLine, %A_Tab%
 		{
-			if (trim(A_LoopReadLine != "")) {
-				idx++
-				;~ MsgBox, Field number %A_Index% is %A_LoopField%.
-				GuiControl,, WinSize, % "Executing predefined battle flow..." idx "/" numLines
+			if (trim(A_LoopReadLine) != "") {
+				;~ if this line is a line that contains map info, then ignore
 				dt := StrSplit(A_LoopField, ",")
 				action := dt[1]
 				args := dt[2]
 				desc := dt[3]
 				
-				perform(action, args, desc)
+				if(action != "INFO" && action != "DESC") {
+					idx++
+					;~ MsgBox, Field number %A_Index% is %A_LoopField%.
+					GuiControl,, WinSize, % "Executing predefined battle flow..." idx "/" numLines
+					
+					perform(action, args, desc)
+				}
 			}
 		}
 	}
@@ -107,6 +115,7 @@ perform(action, args="", desc="") {
 			; search for image
 		case "AUTO":
 			; find and click auto?
+			battleView_Auto()
 		case "CONFIRM":
 			; confirm skill not set but start turn
 			battleView_Confirm()
@@ -264,8 +273,8 @@ coordClick(x, y) {
 	;~ GuiControl,, clickPosIndicator, x = %x%`, y = %y%`, Action -> %act%, Click Time Offset -> %tPause%s
 	
 	if(hasEarlyResult()) {
-			return
-		}
+		return
+	}
 	
 	ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	

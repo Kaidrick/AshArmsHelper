@@ -1,4 +1,6 @@
-SELECT,1,Grille use fire support plus stuart and mc200
+﻿INFO,03A,10,N
+DESC,MC200(Recon),,,,Grille(Fire Support),Stuart(Fire Support),,,,,,
+SELECT,1,
 DESELECT,1,
 BATTLE,,
 CONFIRM,,

@@ -45,10 +45,10 @@
 			"w": 26, "h": 31
 		}, 
 		"searchRegion": {
-			"X1": 604,
-			"Y1": 601,
-			"X2": 898,
-			"Y2": 689
+			"X1": 598,
+			"Y1": 625,
+			"X2": 660,
+			"Y2": 668
 		},
 		"act": "出撃準備 確認"
 	},
@@ -77,6 +77,24 @@
 		"act": "Battle Result Check",
 		"override": "quick taps"
 	},
+	
+	"repeatStageFromBattleResult": {
+		"x": -1, "y": -1, 
+		"path": "postStage_Repeat.png", 
+		"offset": {
+			"x": 0, "y": 0
+		}, 
+		"size": {
+			"w": 166, "h": 50
+		}, 
+		"searchRegion": {
+			"X1": 431,
+			"Y1": 617,
+			"X2": 628,
+			"Y2": 699
+		},
+		"act": "Repeat Selected Stage"
+	}, 
 	
 	"tapAnywhere": {
 		"x": 642, "y": 73,
