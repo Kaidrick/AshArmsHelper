@@ -273,8 +273,8 @@ coordClick(x, y) {
 	;~ GuiControl,, clickPosIndicator, x = %x%`, y = %y%`, Action -> %act%, Click Time Offset -> %tPause%s
 	
 	if(hasEarlyResult()) {
-			return
-		}
+		return
+	}
 	
 	ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	

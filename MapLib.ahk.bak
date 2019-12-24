@@ -23,9 +23,11 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 	global canRun
 	global allData
 	
-	yBorder = 36
+	global yBorder
 	
 	viewObj := allData[viewObjName]
+	
+	imgPath := A_ScriptDir "\data\img\" viewObj["path"]
 	
 	retryCount = 0
 	while(true) {
@@ -39,7 +41,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 		
 		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
 
-		pBitmapNeedle := Gdip_CreateBitmapFromFile(viewObj["path"])
+		pBitmapNeedle := Gdip_CreateBitmapFromFile(imgPath)
 
 		; TODO: consider search region if provided by the view object?
 		
@@ -169,9 +171,11 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 	global asaGameHwnd
 	global canRun
 
-	yBorder = 36
+	global yBorder
 	
 	iters = 0
+	
+	imgPath := A_ScriptDir "\data\img\" imgPath
 	
 	while(true) {
 		if(!canRun) {
@@ -231,12 +235,13 @@ notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, num
 	global asaGameHwnd
 	global canRun
 
-	yBorder = 36
+	global yBorder
 	
 	iters = 0
 	assertCount = 0
 	notFound = true
 	
+	imgPath := A_ScriptDir "\data\img\" imgPath
 	
 	while(true) {
 		if(!canRun) {
@@ -304,14 +309,16 @@ hasEarlyResult() {  ; if battle is ended earlier than expected
 		return
 	}
 	
-	yBorder = 36
+	global yBorder
 	
 	retryCount = 0
+	
+	imgPath := A_ScriptDir "\data\img\resultBattleStats.png"
 	
 	pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
 	
 	; Check for resultBattleStats.png
-	pBitmapNeedle := Gdip_CreateBitmapFromFile("resultBattleStats.png")
+	pBitmapNeedle := Gdip_CreateBitmapFromFile(imgPath)
 	
 	sX1 := 1136
 	sY1 := 417 + yBorder
@@ -352,7 +359,7 @@ handleGeneralError() {
 		return
 	}
 	
-	yBorder = 36
+	global yBorder
 	
 	eX1 := 373
 	eY1 := 430 + yBorder
@@ -361,10 +368,12 @@ handleGeneralError() {
 	
 	retryCount = 0
 	
+	imgPath := A_ScriptDir "\data\img\" errorConfirmButton["path"]
+	
 	pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
 	
 	; Check for RefreshPlayerData Error
-	pBitmapNeedle_errorConfirmButton := Gdip_CreateBitmapFromFile(errorConfirmButton["path"])
+	pBitmapNeedle_errorConfirmButton := Gdip_CreateBitmapFromFile(imgPath)
 	result_errorConfirmButton := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle_errorConfirmButton,OutputList,eX1,eY1,eX2,eY2,60,0,1,1)
 	
 	; try freeing vars
@@ -440,7 +449,7 @@ checkForError() {
 	eX2 = 870
 	eY2 = 400
 	
-	yBorder = 36
+	global yBorder
 	
 	retryCount = 0
 	
@@ -721,7 +730,7 @@ quickTapAnywhere(numClick=20) {
 	global WinSize            ; status bar
 	global allData            ; click data
 	
-	yBorder := 36 ; constant border px
+	global yBorder ; constant border px
 	
 	; base point
 	;~ Random, xBase, 562.0, 1000.0
@@ -777,7 +786,7 @@ getRandomClick(mapDataObj, clickPosIndicator)  ; OBSOLETE, but maybe useful for 
 	
 	xRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
 	yRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
-	yBorder := 36
+	global yBorder
 	
 	; if mapDataObj's x and y are both -1, it is an image find test
 	; else apply coord click

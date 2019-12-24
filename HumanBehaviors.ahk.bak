@@ -33,7 +33,7 @@ simulateRandomBehavior() {
 				Sleep 1000
 				tElapsed++  ; sleep 4 hours to simulate sleep, need more work
 				changeStatusText("Long Sleep..." tElapsed "s elapsed")
-				if(tElapsed > 3600) { 
+				if(tElapsed > 14400) { 
 					break
 				}
 			}

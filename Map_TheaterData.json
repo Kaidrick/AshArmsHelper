@@ -1,4 +1,22 @@
 ﻿{
+	"mapView_00": {
+		"x": 433, "y": 272, 
+		"path": "mapTheater_00.png", 
+		"offset": {
+			"x": -13, "y": 3
+		}, 
+		"size": {
+			"w": 45, "h": 33
+		}, 
+		"searchRegion": {
+			"X1": 161,
+			"Y1": 141,
+			"X2": 294,
+			"Y2": 223
+		},
+		"act": "荒野 「00」"
+	},
+	
 	"mapView_01": {
 		"x": 433, "y": 272, 
 		"path": "mapTheater_01.png", 

@@ -10,19 +10,20 @@ CoordMode, Pixel, Window
 #Include FlowExec.ahk
 
 ; To-do list
-; 1. deals with invalid auth after long idle time
-; 2. add the ability to choose stage automatically:
+; 1. deals with invalid auth after long idle time (partially implemented)
+; 2. add the ability to choose stage automatically (partially implemented)
 ;       * use horizontal click and drag to move the stage map
-;       * use image search to determine current position?
-;       * use image search to click on target stage
-; 3. BattleCmd error? try to reproduce?
+; 3. validate clicks; that is, check if click is successfual / UI is responsive for this click; if not, retry      
+; 
 
+eop_path := A_ScriptDir "\emulator window title.ini"
+FileReadLine, emulatorWindowTitle, %eop_path%, 1
 
 ; standard wait time
 stdWaitTime = 1.0
 stdLoadTime = 8.0
 
-; Emulator title height -> yBorder
+; Emulator window title height -> yBorder
 yBorder = 36  ; NemuPlayer
 
 ; Click error
@@ -50,19 +51,15 @@ longSessionBreak := false
 Gui, Add, Text, x5 y5 h14 w150 vWorkStatusIndicator, %workStatus%
 Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
 Gui, Add, Text, x5 y45 h48 w450 vClickPosIndicator, %clickPos%
-Gui, Add, Text, x400 y5 h14 w100 vRunNum, %statsRun%
+Gui, Add, Text, x220 y5 h14 w100 vRunNum, %statsRun%
 
-Gui, Show, w500 h500, % "アッシュアームズ自動管理システム"
+Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"
 
-Gui, Add, Button, x250 y125 h50 w50 vMasterButton gMasterRoutine, % "Start"
-Gui, Add, Button, x300 y125 h50 w50 vStopButton gBigSwitchOff, % "Stop"
+Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % "Start"
+Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % "Stop"
 Gui, Add, Button, x445 y145 h50 w50 gTapTap, % "Test Function"
 
 Gui, Add, Text, x5 y200 h170 w450 vStageInstruction, % "Select a stage from the droplist"
-
-; map selection dropdown list
-;~ Gui, Add, DropDownList, x250 y100 vStageChoice gOnStageSelect w200 h50 Choose2 R5, 遺跡 01-06 (Manual)|雪原 03A-02 N|雪原 03A-02 N (Manual)|雪原 03A-06 N (ランカ/Pe-2/Ju87/SBD)|雪原 03A-08 N (Manual)|雪原 03A-10 N (Manual)|溶岩 04A-10 N|溶岩 04A-10 N (Manual)|森丘 05A-02 N (Manual)|——————————————————|雪原奥地 03B-04 N (SDB碎片)|雪原奥地 03B-06 N (兰开碎片/矿)|溶岩奥地 04B-08 N (KV-1碎片)
-
 
 ; add as per file
 path := A_ScriptDir "\data\flow\*.txt"
@@ -72,10 +69,14 @@ Loop %path% {
 	files = %files% | %stdName%
 }
 
-Gui, Add, DropDownList, x250 y100 vStageChoiceNew gOnStageSelectNew w200 h50 Choose1 R5, %files%
+Gui, Add, Text, x5 y90 h10 w450 vBr1, % "———————————————————————————————————————————————"
 
-Gui, Add, CheckBox, x5 y145 h20 w150 gForceClick, % "Silent Mode (Coord and Time only)"
-Gui, Add, Checkbox, x5 y165 h20 w200 gLongSession, % "Sleep Session (Allow long break)"
+Gui, Add, DropDownList, x5 y105 vStageChoiceNew gOnStageSelectNew w280 h50 Choose1 R5, %files%
+
+Gui, Add, CheckBox, x115 y130 h26 w150 vCB_ForceClick gForceClick, % "[WIP] Silent Mode (Coord and Time only)"
+GuiControl, Disable, CB_ForceClick
+
+Gui, Add, Checkbox, x115 y160 h20 w200 gLongSession, % "Sleep Session (Allow long break)"
 
 GuiControl,, ClickPosIndicator, % "Ready"
 GuiControl, Disable, StopButton
@@ -110,7 +111,7 @@ limitRuns = 0
 
 
 ; try get window handle
-WinGet, asaGameHwnd, ID, アッシュアームズ - MuMu模拟器
+WinGet, asaGameHwnd, ID, %emulatorWindowTitle%
 
 if (asaGameHwnd) {
 	GuiControl,, WorkStatusIndicator, % "Emulator HWND: " + asaGameHwnd
@@ -119,7 +120,7 @@ if (asaGameHwnd) {
 	WinGetPos,,, winResolutionWidth, winResolutionHeight, ahk_id %asaGameHwnd%
 	GuiControl,, WinSize, Initial Window Size: %winResolutionWidth% x %winResolutionHeight%
 } else {
-	MsgBox, Unable to locate Ash Arms emulator window.`rPlease make sure the emulator is running properly.`rAHK will now quit.
+	MsgBox, Unable to locate Ash Arms emulator window.`rPlease make sure the emulator is running properly.`rScript will now terminate.
 	ExitApp
 }
 
@@ -131,11 +132,11 @@ if (asaGameHwnd) {
 tapAnywhere := {x: 642, y: 73, act: "Quick Taps"}  ; need xy data for different games, supposedly?
 
 ; Errors
-refreshPlayerData := {x: 0, y: 0, path: "Error_RefreshPlayerData.PNG", size: {w: 195, h: 40}, offset: {x: 167, y: 164}, act: "Deal RefreshPlayerData error"}
-updatePlayerData := {x: 0, y: 0, path: "Error_UpdatePlayerData.PNG", size: {w: 196, h: 37}, offset: {x: 167, y: 164}, act: "Deal UpdatePlayerData error"}
-networkError := {x: 0, y: 0, path: "Error_NetWork.PNG", size: {w: 208, h: 36}, offset: {x: 167, y: 164}, act: "Deal Network error"}
-connectionError := {x: 0, y: 0, path: "Error_Connection.png", size: {w: 247, h: 38}, offset: {x: 258, y: 165}, act: "Deal Connection error"}
-battleCmdError := {x: 0, y: 0, path: "Error_BattleCmd.png", size: {w: 113, h: 30}, offset: {x: 208, y: 165}, act: "Deal Battle Cmd Error"}
+;~ refreshPlayerData := {x: 0, y: 0, path: "Error_RefreshPlayerData.PNG", size: {w: 195, h: 40}, offset: {x: 167, y: 164}, act: "Deal RefreshPlayerData error"}
+;~ updatePlayerData := {x: 0, y: 0, path: "Error_UpdatePlayerData.PNG", size: {w: 196, h: 37}, offset: {x: 167, y: 164}, act: "Deal UpdatePlayerData error"}
+;~ networkError := {x: 0, y: 0, path: "Error_NetWork.PNG", size: {w: 208, h: 36}, offset: {x: 167, y: 164}, act: "Deal Network error"}
+;~ connectionError := {x: 0, y: 0, path: "Error_Connection.png", size: {w: 247, h: 38}, offset: {x: 258, y: 165}, act: "Deal Connection error"}
+;~ battleCmdError := {x: 0, y: 0, path: "Error_BattleCmd.png", size: {w: 113, h: 30}, offset: {x: 208, y: 165}, act: "Deal Battle Cmd Error"}
 
 errorConfirmButton := {x: 0, y: 0, path: "Error_ConfirmButton.png", size: {w: 203, h: 75}, offset: {x: 0, y: 0}, act: "General Error Handling"}
 
@@ -281,7 +282,7 @@ if(canRun) {
 		rWait := NormalRand(0, stdWaitTime, 0)
 
 		findClick(mapTheaterKeyName)
-		Sleep rWait
+		Sleep rWait * 1000
 		
 		findClick(mapNodeKeyName)
 		Sleep 2000
@@ -309,31 +310,9 @@ if(canRun) {
 		workDone := true
 		isRepeatTask := true
 	}
-	
-	;~ gosub GrindStart
-
-	;~ rWait := NormalRand(0, stdWaitTime, 0)
-	;~ MsgBox, find click map theater now
-	;~ findClick(mapTheaterKeyName)
-	;~ Sleep rWait
-	
-	;~ findClick(mapNodeKeyName)
-	;~ Sleep 500
-	;~ findClick("orderReady")
-	;~ Sleep 500
-	;~ findClick("affirmReady")
-
-	;~ executeFlow(path)
-
-	;~ findClick("resultBattleStats",,,true)
-	
-	;~ workDone := true
-	
-
-
 
 } else {
-	; work is not done or is not ready to dispatch new work
+	; work is not done or script is not ready to dispatch new work
 	;~ MsgBox, switch is off, cannot dispatch
 }
 return
@@ -352,13 +331,19 @@ BigSwitchOn() {
 	global isRepeatTask
 	global MasterButton
 	global StopButton
-	global StageChoice
+	global StageChoiceNew
+	
+	if (StageChoiceNew = "") {
+		MsgBox % "Choose a stage from the list before clicking on Start button."
+		return
+	}
 	
 	canRun := true
 	isRepeatTask := false
 	GuiControl, Disable, MasterButton
 	GuiControl, Enable, StopButton
-	GuiControl, Disable, StageChoice
+	GuiControl, Disable, StageChoiceNew
+
 	return
 }
 
@@ -371,7 +356,7 @@ BigSwitchOff() {
 	canRun := false
 	isRepeatTask := false
 	GuiControl, Disable, StopButton
-	GuiControl, Enable, StageChoice
+	GuiControl, Enable, StageChoiceNew
 	changeStatusText("Stopping...")
 	;~ Reload
 	return
@@ -402,327 +387,11 @@ Sleep 2000  ; wait for main page
 ; generate a random click wait time
 rWait := NormalRand(0, stdWaitTime, 0)
 findClick("mapCampaign")
-Sleep rWait
-
-
-; determine which theatre and which stage to go?
-; search files with name
-
-
-return
-
-
-
-Grind03A-10N-Manual:
-gosub GrindStart
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_03A")
-Sleep rWait
-
-gosub Continue03A-10N-Manual
-workDone := true
-return
-
-Continue03A-10N-Manual:
-findClick("mapSel_03A10N")
-Sleep 500
-findClick("orderReady")
-Sleep 500
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\03A-10 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-
-
-
-
-Grind03A-08N-Manual:
-gosub GrindStart
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_03A")
-Sleep rWait
-
-gosub Continue03A-08N-Manual
-workDone := true
-return
-
-Continue03A-08N-Manual:
-findClick("mapSel_03A08N")
-Sleep 500
-findClick("orderReady")
-Sleep 500
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\03A-08 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-
-
-Grind01-06-Manual:
-gosub GrindStart
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_01")
-Sleep rWait
-
-gosub Continue01-06-Manual
-workDone := true
-return
-
-Continue01-06-Manual:
-findClick("mapSel_0106")
-Sleep 500
-findClick("orderReady")
-Sleep 500
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\01-06.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-
-Grind03A-02N:
-gosub GrindStart
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_03A")
-;~ switchView(mapView03A)
-Sleep rWait
-
-gosub Continue03A-02N
-workDone := true
-return
-
-
-
-Grind03A-02N-Manual:
-gosub GrindStart
-
-findClick("mapView_03A")
-gosub Continue03A-02N-Manual
-workDone := true
-return
-
-
-Continue03A-02N-Manual:
-Sleep 1000
-findClick("mapSel_03A02N")
-Sleep 1000
-findClick("orderReady")
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\03A-02 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-
-Grind04A-10N:
-gosub GrindStart
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_04A")
-Sleep rWait
-
-gosub Continue04A-10N
-
-TrayTip,, Falldown End, 5
-return
-
-
-Continue03A-02N:
-;~ Random, rWait, 1500.0, 4500.0
-rWait := NormalRand(0, stdWaitTime, 0)
-
-findClick("mapSel_03A02N")
 Sleep rWait * 1000
 
-gosub AutoBattleProcess
-
 return
 
 
-Continue04A-10N:
-;~ Random, rWait, 1500.0, 4500.0
-rWait := NormalRand(0, stdWaitTime, 0)
-
-findClick("mapSel_04A10N")
-Sleep rWait * 1000
-
-gosub AutoBattleProcess
-
-return
-
-
-Grind04A-10N-Manual:
-gosub GrindStart
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_04A")
-Sleep rWait
-
-gosub Continue04A-10N-Manual
-workDone := true
-return
-
-
-Continue04A-10N-Manual:
-Sleep 1000
-findClick("mapSel_04A10N")
-Sleep 1000
-findClick("orderReady")
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\04A-10 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-
-Grind05A-02N-Manual:
-gosub GrindStart
-
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_05A")
-Sleep rWait
-
-gosub Continue05A-02N-Manual
-workDone := true
-return
-
-
-Continue05A-02N-Manual:
-Sleep 1000
-findClick("mapSel_05A02N")
-Sleep 1000
-findClick("orderReady")
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\05A-02 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-Grind04B-08N-Manual:
-gosub GrindStart
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_04B")
-Sleep rWait
-
-gosub Continue04B-08N-Manual
-workDone := true
-
-return
-
-
-Continue04B-08N-Manual:
-Sleep 1000
-findClick("mapSel_04B08N")
-Sleep 1000
-findClick("orderReady")
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\04B-08 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-
-Grind03B-04N-Manual:
-gosub GrindStart
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_03B")
-Sleep rWait
-
-gosub Continue03B-04N-Manual
-workDone := true
-
-return
-
-continue03B-04N-Manual:
-Sleep 1000
-findClick("mapSel_03B04N")
-Sleep 1000
-findClick("orderReady")
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\03B-04 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-Grind03B-06N-Manual:
-gosub GrindStart
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_03B")
-Sleep rWait
-
-gosub Continue03B-06N-Manual
-workDone := true
-
-return
-
-continue03B-06N-Manual:
-Sleep 1000
-findClick("mapSel_03B06N")
-Sleep 1000
-findClick("orderReady")
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\03B-06 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
-
-
-Grind03A-06N-Manual:
-gosub GrindStart
-rWait := NormalRand(0, stdWaitTime, 0)
-findClick("mapView_03A")
-Sleep rWait
-
-gosub Continue03A-06N-Manual
-workDone := true
-
-return
-
-continue03A-06N-Manual:
-Sleep 1000
-findClick("mapSel_03A06N")
-Sleep 1000
-findClick("orderReady")
-findClick("affirmReady")
-
-path := A_ScriptDir "\data\flow\03A-06 N.txt"
-executeFlow(path)
-
-findClick("resultBattleStats",,,true)
-return
 
 
 
