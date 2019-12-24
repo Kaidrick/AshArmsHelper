@@ -53,7 +53,7 @@ Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
 Gui, Add, Text, x5 y45 h48 w450 vClickPosIndicator, %clickPos%
 Gui, Add, Text, x220 y5 h14 w100 vRunNum, %statsRun%
 
-Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ自動周回ﾍﾙﾊﾟｰ"
+Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"
 
 Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % "Start"
 Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % "Stop"

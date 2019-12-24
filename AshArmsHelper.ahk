@@ -144,14 +144,6 @@ return
 
 
 
-OnStageSelect:
-Gui, Submit, nohide
-selStage := StageChoice
-
-TrayTip,, Grinding Stage: %selStage%, 5
-;~ MsgBox, %selStage%
-return
-
 OnStageSelectNew:
 Gui, Submit, nohide
 selStageNew := StageChoiceNew
