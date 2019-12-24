@@ -4,9 +4,17 @@ Free yourself from the endless grinding! Hopefully?
 But the true intention of this piece of script is just to show it is absolutely not practical to put any kind of "script" detection mechanism in a mobile game app.
 This script implements random clicks coordinates and time before each click operation, and a random wait time after each "rotation" finishes. You can also check the "Sleep Session" to so that the simulator will pause for several hours after reaching a speicifc number of runs.
 
+
+# Highlights
+1. If you don't feel like to AUTO all the stages, you can write and define your own battle flow, tailored to your own BOX, in just a few line.
+2. Handles all kinds of connection errors or bug induced errors and attempts to re-login and restart the script if necessary.
+
+
 **Notice that you have to start the android emulator of your choice in 720P for the script to run properly because it relies heavily on image search functions.**
 
 This script relies on AutoHotKey to run, and you can download AHK at https://www.autohotkey.com/
+
+# Writing "battle flows"
 
 Currently, there are only limited amount of stages in the data folder, which means that if you want to grind a stage that is not included, you have to do some work on your end.
 
