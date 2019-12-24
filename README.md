@@ -1,6 +1,8 @@
 # AshArmsHelper
 Free yourself from the endless grinding! Hopefully?
 
+![User Interface](helper_view.png)
+
 But the true intention of this piece of script is just to show it is absolutely not practical to put any kind of "script" detection mechanism in a mobile game app.
 This script implements random clicks coordinates and time before each click operation, and a random wait time after each "rotation" finishes. You can also check the "Sleep Session" to so that the simulator will pause for several hours after reaching a speicifc number of runs.
 
@@ -9,6 +11,7 @@ This script implements random clicks coordinates and time before each click oper
 1. If you don't feel like to AUTO all the stages, you can write and define your own battle flow, tailored to your own BOX, in just a few line.
 2. Handles all kinds of connection errors or bug induced errors and attempts to re-login and restart the script if necessary.
 
+![User Interface](emulator_test_pic_1.gif)
 
 **Notice that you have to start the android emulator of your choice in 720P for the script to run properly because it relies heavily on image search functions.**
 
