@@ -19,6 +19,13 @@
 
 你需要AutoHotKey软件来运行脚本，你可以在https://www.autohotkey.com/下载AHK
 
+
+# 如何使用
+在`emulator window title.ini`文件中填写模拟器窗口的标题，保存为UTF-8-BOM编码
+点击并拖动`AshArmsHelper.ahk`文件至AutoHotkeyU64.exe图标上以运行
+![Open AHK](emulator_test_pic_2.gif)
+
+
 # 定义“战斗流程”
 
 目前，data文件夹里只提供了个人比较常用的地图数据，也就是说，如果你想刷其他图，需要自己动手做一些准备。

@@ -19,6 +19,13 @@ This script implements random clicks coordinates and time before each click oper
 
 This script relies on AutoHotKey to run, and you can download AHK at https://www.autohotkey.com/
 
+
+# How to use
+Open `emulator window title.ini` and change the text to the window title of the emulator of your choice. Save the file in UTF-8-BOM.
+Click and drag `AshArmsHelper.ahk` file on AutoHotkeyU64.exe (or use your own copy of AHK)
+![Open AHK](emulator_test_pic_2.gif)
+
+
 # Writing "battle flows"
 
 Currently, there are only limited amount of stages in the data folder, which means that if you want to grind a stage that is not included, you have to do some work on your end.
