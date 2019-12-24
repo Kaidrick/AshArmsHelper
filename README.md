@@ -13,7 +13,7 @@ This script implements random clicks coordinates and time before each click oper
 
 ![User Interface](emulator_test_pic_1.gif)
 
-**Notice that you have to start the android emulator of your choice in 720P for the script to run properly because it relies heavily on image search functions.**
+**Notice that you have to start the android emulator of your choice in 720P (1280 * 720) for the script to run properly because it relies heavily on image search functions, and the image to be used cannot be rescaled with the window, at least for now.**
 
 This script relies on AutoHotKey to run, and you can download AHK at https://www.autohotkey.com/
 
