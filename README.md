@@ -1,3 +1,5 @@
+[点此阅读简体中文版说明](README_CN.md)
+
 # AshArmsHelper
 Free yourself from the endless grinding! Hopefully?
 
