@@ -6,7 +6,7 @@ Free yourself from the endless grinding! Hopefully?
 ![User Interface](helper_view.png)
 
 But the true intention of this piece of script is just to show it is absolutely not practical to put any kind of "script" detection mechanism in a mobile game app.
-This script implements random clicks coordinates and time before each click operation, and a random wait time after each "rotation" finishes. You can also check the "Sleep Session" to so that the simulator will pause for several hours after reaching a speicifc number of runs.
+This script implements random clicks coordinates and time before each click operation, and a random wait time after each "rotation" finishes. You can also check the "Sleep Session" to so that the simulator will pause for several hours after finishing a specifc number of runs.
 
 
 # Highlights
