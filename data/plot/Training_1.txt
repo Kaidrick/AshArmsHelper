@@ -1,0 +1,23 @@
+Training 1
+
+
+Training 2
+Hurricane and He-111
+
+Training 3
+comp: yak7 hurricane he-111, grasshopper + 2 fodders
+yak7 and hurricane wait at masu 2 and cqc, he-111 wait at 2, all unit no skill on first turn
+grasshopper will get hit
+he-111 bomb masu2
+grasshopper move to masu2 and use skill 4
+
+Training 4
+enemy arty cannot attack air unit
+
+
+bug:
+press orderReady and then go back to tap start
+
+
+pcr clan battle
+C3: 双狼511情姐

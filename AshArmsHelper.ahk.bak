@@ -60,7 +60,7 @@ Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"
 
 Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % "Start"
 Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % "Stop"
-;~ Gui, Add, Button, x230 y45 h50 w50 gTapTap, % "Test Function"
+Gui, Add, Button, x230 y45 h50 w50 gTapTap, % "Test Function"
 
 Gui, Add, Text, x5 y200 h170 w450 vStageInstruction, % "Select a stage from the droplist"
 
