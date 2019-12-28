@@ -26,6 +26,12 @@ simulateRandomBehavior() {
 	global skipSleep
 	global WakeButton
 	
+	global runNonStop
+	
+	if (runNonStop) {
+		return  ;~ no break or sleep
+	}
+	
 	; if longSessionBreak is true, sleep 4 hours after 60 runs
 	if (longSessionBreak) {
 		

@@ -215,10 +215,6 @@ battleView_Confirm() {
 			return
 		}
 	coordClick(1052, 343)
-	
-	Sleep 5000
-	handleGeneralError()  ; dealing with errors
-	checkLoginOnBadAuth()  ; dealing with login problems
 }
 
 

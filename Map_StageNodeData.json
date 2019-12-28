@@ -113,6 +113,25 @@
 		"type": "mapNodeSel"
 	},
 	
+	"mapSel_02B04N": {
+		"x": 475, "y": 470, 
+		"path": "mapSel_02B-04N.png", 
+		"offset": {
+			"x": -105, "y": 78
+		}, 
+		"size": {
+			"w": 125, "h": 22
+		}, 
+		"searchRegion": {
+			"X1": 53,
+			"Y1": 300,
+			"X2": 1203,
+			"Y2": 420
+		},
+		"act": "▶ 02B-04 N",
+		"type": "mapNodeSel"
+	},
+	
 	"mapSel_03A02N": {
 		"x": 475, "y": 470, 
 		"path": "mapSel_03A-02N.png", 

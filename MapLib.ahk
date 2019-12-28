@@ -648,6 +648,8 @@ checkForError() {
 checkLoginOnBadAuth() {
 	global canRun
 	global canRestart
+	global runCount
+	global previousRunCount
 	; check for associate data with account option image in the lower right corner
 	; if found, click a few times to login
 	
@@ -692,6 +694,10 @@ checkLoginOnBadAuth() {
 			; TODO !!!
 			; set canRestart and canRun
 			changeStatusText("Restarting the script run...")
+			
+			;~ copy current runCount
+			previousRunCount = runCount
+			
 			Sleep 2000
 			
 			BigSwitchOff()

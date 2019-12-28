@@ -49,6 +49,7 @@ alwaysSkipSleep := false ;~ to-do
 
 ; User options
 longSessionBreak := false
+runNonStop := false
 
 
 Gui, Add, Text, x5 y5 h14 w135 vWorkStatusIndicator, %workStatus%
@@ -60,7 +61,7 @@ Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"
 
 Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % "Start"
 Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % "Stop"
-Gui, Add, Button, x230 y45 h50 w50 gTapTap, % "Test Function"
+;~ Gui, Add, Button, x230 y45 h50 w50 gTapTap, % "Test Function"
 
 Gui, Add, Text, x5 y200 h170 w450 vStageInstruction, % "Select a stage from the droplist"
 
@@ -76,8 +77,10 @@ Gui, Add, Text, x5 y90 h10 w450 vBr1, % "—————————————
 
 Gui, Add, DropDownList, x5 y105 vStageChoiceNew gOnStageSelectNew w280 h50 Choose1 R5, %files%
 
-Gui, Add, CheckBox, x115 y130 h26 w150 vCB_ForceClick gForceClick, % "[WIP] Silent Mode (Coord and Time only)"
-GuiControl, Disable, CB_ForceClick
+Gui, Add, CheckBox, x115 y130 h26 w150 vCB_Nonstop gNonStop, % "Non-stop Mode"
+
+;~ Gui, Add, CheckBox, x115 y130 h26 w150 vCB_ForceClick gForceClick, % "[WIP] Silent Mode (Coord and Time only)"
+;~ GuiControl, Disable, CB_ForceClick
 
 Gui, Add, Checkbox, x115 y160 h20 w200 gLongSession, % "Sleep Session (Allow long break)"
 
@@ -91,6 +94,7 @@ GuiControl, Disable, StopButton
 
 ; Initialize
 runCount = 0
+previousRunCount = 0  ;~ copy runCount on script restart
 
 selStage := "雪原 03A-02 N"
 selStageNew := ""
@@ -194,9 +198,9 @@ return
 TapTap:
 canRun := true
 
-simulateRandomBehavior()
+;~ simulateRandomBehavior()
 
-;~ checkLoginOnBadAuth()
+checkLoginOnBadAuth()
 ;~ quickTapAnywhere()
 ;~ canRun = true
 ;~ checkLoginOnBadAuth()
@@ -219,7 +223,13 @@ return
 
 
 MasterRoutine:
-runCount = 0
+runCount = 0  ;~ reset runCount on start
+
+if(previousRunCount != 0) {
+	runCount := previousRunCount
+	previousRunCount = 0
+}
+
 GuiControl,, RunNum, % "Round: " runCount
 
 ; run the process
@@ -233,8 +243,8 @@ while(true) {
 		break  ; the whole script should halt here
 		; check if canStart?
 	}
-	runCount++
-	GuiControl,, RunNum, % "Round: " runCount
+	;~ runCount++
+	;~ GuiControl,, RunNum, % "Round: " runCount
 	
 	; if user defines a number of stages to be run before the script stop
 	if (limitRun > 0 && runCount >= limitRun) {
@@ -309,6 +319,9 @@ if(canRun) {
 		workDone := true
 		
 		isRepeatTask := true
+		
+		runCount++
+		GuiControl,, RunNum, % "Round: " runCount
 	} else {
 		;~ start from result page
 		findClick("repeatStageFromBattleResult")
@@ -331,6 +344,9 @@ if(canRun) {
 		
 		workDone := true
 		isRepeatTask := true
+		
+		runCount++
+		GuiControl,, RunNum, % "Round: " runCount
 	}
 
 } else {
@@ -379,6 +395,7 @@ BigSwitchOff() {
 	isRepeatTask := false
 	GuiControl, Disable, StopButton
 	GuiControl, Enable, StageChoiceNew
+	GuiControl, Hide, WakeButton
 	changeStatusText("Stopping...")
 	;~ Reload
 	return
@@ -389,6 +406,14 @@ if (useCoordDataOnly = true) {
 	useCoordDataOnly := false
 } else {
 	useCoordDataOnly := true
+}
+return
+
+NonStop:
+if (runNonStop = true) {
+	runNonStop := false
+} else {
+	runNonStop := true
 }
 return
 
