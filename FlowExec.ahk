@@ -119,6 +119,9 @@ perform(action, args="", desc="") {
 		case "CONFIRM":
 			; confirm skill not set but start turn
 			battleView_Confirm()
+		case "SKIP":
+			; skill this turn
+			battleView_SkipTurn()
 	}
 }
 
@@ -158,7 +161,7 @@ battleView_Deselect(index) {
 		case 6: coordClick(981, 638)
 		Default: coordClick(113, 638)
 	}
-	Sleep 500
+	; Sleep 500
 }
 
 battleView_Move(index) {
@@ -176,7 +179,7 @@ battleView_Move(index) {
 		case 7: coordClick(971, 411)
 		case 8: coordClick(1096, 411)
 	}
-	Sleep 500  ; should be random
+	; Sleep 500  ; should be random
 }
 
 battleView_Switch() {
@@ -219,6 +222,16 @@ battleView_Confirm() {
 	Sleep 5000
 	handleGeneralError()  ; dealing with errors
 	checkLoginOnBadAuth()  ; dealing with login problems
+}
+
+battleView_SkipTurn() {
+	;~ skill this turn without doing anything
+	;~ if start turn image exists, click on it
+	existImage("battleView_BattleStart.png",,,,,,0)
+	if(hasEarlyResult()) {
+			return
+		}
+	coordClick(1162, 609)
 }
 
 
@@ -266,6 +279,7 @@ coordClick(x, y) {
 	global WinSize
 	global stdErrorRange
 	global yBorder
+	global clickNoDelay
 	
 	; generate random click position offset
 	xRand := NormalRand(-stdErrorRange, stdErrorRange, 0)
@@ -275,8 +289,11 @@ coordClick(x, y) {
 	yClick := y + yRand + yBorder
 	
 	; random sleep
-	;~ tPause := NormalRand(0, stdWaitTime, 0)
-
+	if(!clickNoDelay) {
+		tPause := NormalRand(0, stdWaitTime, 0)
+		Sleep tPause * 1000
+	}
+	
 	;~ GuiControl,, clickPosIndicator, x = %x%`, y = %y%`, Action -> %act%, Click Time Offset -> %tPause%s
 	
 	if(hasEarlyResult()) {

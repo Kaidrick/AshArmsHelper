@@ -22,6 +22,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 	global refreshPlayerData
 	global canRun
 	global allData
+	global clickNoDelay
 	
 	global yBorder
 	
@@ -910,14 +911,22 @@ ExecClick(actName, pX, pY, delay, canSimulateHumanBehavior) {
 	global ClickPosIndicator
 	global canRun
 	global asaGameHwnd
+	global clickNoDelay
 	
-	GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%`nDelay: %delay%s
+	if (!clickNoDelay) {
+		GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%
+	} else {
+		GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%`nDelay: %delay%s
+	}
 	
 	if (canSimulateHumanBehavior) {
 		simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
 	}
 	
-	Sleep delay * 1000
+	if (!clickNoDelay) {
+		Sleep delay * 1000
+	}
+	
 	; check if stop condition met
 	if(!canRun) {
 		;~ MsgBox, cancelling

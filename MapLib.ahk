@@ -22,6 +22,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavi
 	global refreshPlayerData
 	global canRun
 	global allData
+	global clickNoDelay
 	
 	global yBorder
 	
@@ -231,7 +232,7 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 }
 
 ; if numTryAllowed is 0, then allow unlimited try
-notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTryAllowed=5) {
+notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=100, numTryAllowed=2) {
 	global asaGameHwnd
 	global canRun
 
@@ -910,14 +911,22 @@ ExecClick(actName, pX, pY, delay, canSimulateHumanBehavior) {
 	global ClickPosIndicator
 	global canRun
 	global asaGameHwnd
+	global clickNoDelay
 	
-	GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%`nDelay: %delay%s
+	if (!clickNoDelay) {
+		GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%
+	} else {
+		GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%`nDelay: %delay%s
+	}
 	
 	if (canSimulateHumanBehavior) {
 		simulateRandomBehavior()  ; more reasonable because usually i put it game on auto and switch to other task but forgot about it for a while
 	}
 	
-	Sleep delay * 1000
+	if (!clickNoDelay) {
+		Sleep delay * 1000
+	}
+	
 	; check if stop condition met
 	if(!canRun) {
 		;~ MsgBox, cancelling

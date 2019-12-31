@@ -50,6 +50,7 @@ alwaysSkipSleep := false ;~ to-do
 ; User options
 longSessionBreak := false
 runNonStop := false
+clickNoDelay := false
 
 
 Gui, Add, Text, x5 y5 h14 w135 vWorkStatusIndicator, %workStatus%
@@ -61,7 +62,7 @@ Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"
 
 Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % "Start"
 Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % "Stop"
-;~ Gui, Add, Button, x230 y45 h50 w50 gTapTap, % "Test Function"
+;~ Gui, Add, Button, x5 y180 h16 w100 gTapTap, % "Test"
 
 Gui, Add, Text, x5 y200 h170 w450 vStageInstruction, % "Select a stage from the droplist"
 
@@ -75,14 +76,16 @@ Loop %path% {
 
 Gui, Add, Text, x5 y90 h10 w450 vBr1, % "———————————————————————————————————————————————"
 
-Gui, Add, DropDownList, x5 y105 vStageChoiceNew gOnStageSelectNew w280 h50 Choose1 R5, %files%
+Gui, Add, DropDownList, x5 y105 vStageChoiceNew gOnStageSelectNew w280 h50 Choose1 R10, %files%
 
-Gui, Add, CheckBox, x115 y130 h26 w150 vCB_Nonstop gNonStop, % "Non-stop Mode"
+Gui, Add, CheckBox, x115 y130 h16 w150 vCB_Nonstop gNonStop, % "Non-stop Mode"
+
+Gui, Add, CheckBox, x115 y147 h16 w150 vCB_NoDelay gNoDelay, % "Click No Delay"
 
 ;~ Gui, Add, CheckBox, x115 y130 h26 w150 vCB_ForceClick gForceClick, % "[WIP] Silent Mode (Coord and Time only)"
 ;~ GuiControl, Disable, CB_ForceClick
 
-Gui, Add, Checkbox, x115 y160 h20 w200 gLongSession, % "Sleep Session (Allow long break)"
+Gui, Add, Checkbox, x115 y164 h16 w200 gLongSession, % "Sleep Session (Allow long break)"
 
 Gui, Add, Button, x150 y5 h15 w30 vWakeButton gWakeUpNow, % "▶▶"
 GuiControl, Hide, WakeButton
@@ -198,9 +201,11 @@ return
 TapTap:
 canRun := true
 
+notExistImage("preStage_Consumption.png")
+MsgBox, loading
 ;~ simulateRandomBehavior()
 
-checkLoginOnBadAuth()
+;~ checkLoginOnBadAuth()
 ;~ quickTapAnywhere()
 ;~ canRun = true
 ;~ checkLoginOnBadAuth()
@@ -307,11 +312,23 @@ if(canRun) {
 		Sleep 2000
 		findClick("affirmReady")
 		
-		;~ if no bad auth, then loading
-		;~ if bad auth, then kicked back to title screen
+		;~ check if affirm ready still exists, if so keep clicking
+		stuck := existImage("preStage_Consumption.png")
+		while(stuck) {
+			changeStatusText("Ensuring Stage Loading")
+		
+			handleGeneralError()  ; dealing with errors
+			checkLoginOnBadAuth()  ; dealing with login problems
+			
+			stuck := existImage("preStage_Consumption.png")
+			
+			findClick("affirmReady", 1)  ;~ abort if not found for once
+		}
+		
+		;~ wait until battle button shows up
 		changeStatusText("Loading...")
-		Sleep stdLoadTime * 1000
-
+		existImage("battleView_BattleStart.png",,,,,,0)  ; must see
+		
 		executeFlow(path)
 
 		findClick("resultBattleStats",,,true)
@@ -328,14 +345,22 @@ if(canRun) {
 		Sleep 3000
 		findClick("affirmReady")
 		
-		;~ if no bad auth, then loading
-		;~ if bad auth, then kicked back to title screen
-		changeStatusText("Loading...")
-		Sleep stdLoadTime * 1000
+		;~ check if affirm ready still exists, if so keep clicking
+		stuck := existImage("preStage_Consumption.png")
+		while(stuck) {
+			changeStatusText("Ensuring Stage Loading")
 		
-		;~ bad auth can occur here
-		handleGeneralError()
-		checkLoginOnBadAuth()
+			handleGeneralError()  ; dealing with errors
+			checkLoginOnBadAuth()  ; dealing with login problems
+			
+			stuck := existImage("preStage_Consumption.png")
+			
+			findClick("affirmReady", 1)  ;~ abort if not found for once
+		}
+		
+		;~ wait until battle button shows up
+		changeStatusText("Loading...")
+		existImage("battleView_BattleStart.png",,,,,,0)  ; must see
 
 		;~ execute battle flow if no error
 		executeFlow(path)
@@ -417,6 +442,14 @@ if (runNonStop = true) {
 }
 return
 
+NoDelay:
+if (clickNoDelay = true) {
+	clickNoDelay := false
+} else {
+	clickNoDelay := true
+}
+return
+
 LongSession:
 if (longSessionBreak) {
 	longSessionBreak := false
@@ -430,6 +463,11 @@ return
 GrindStart:
 findClick("returnHomeButton", 5)
 Sleep 2000  ; wait for main page
+
+; todo
+; check exist
+; click
+; check next exist
 
 ; generate a random click wait time
 rWait := NormalRand(0, stdWaitTime, 0)

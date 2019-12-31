@@ -1,0 +1,146 @@
+﻿INFO,03B,10,N
+DESC,Hurricane[Sniper],I-16[Recon],MC-200[CAP],,,,,,,,,,AD-1
+SELECT,3,Select MC-200 (CQB)
+SWITCH,,Switch to high alt
+DESELECT,3,Deselect MC-200
+BATTLE,,Click battle
+CONFIRM,,Confirm unspent points
+WAIT,1000,Wait 1 second
+SELECT,1,Select Hurricane
+MOVE,3,Move to grid 3
+DESELECT,1,Deselect Hurricane
+SELECT,2,Select I-16
+SWITCH,,Switch to high alt
+MOVE,3,Move to grid 3
+SKILL,2,Use Skill#2 high alt recon
+DESELECT,2,Deselect I-16
+SELECT,3,Select MC-200
+MOVE,4,Move to grid 4
+SKILL,3,Use Skill#3 Air Quake CQB
+DESELECT,3,Deselect MC-200
+BATTLE,,Click battle
+CONFIRM,,Confirm unspent points
+WAIT,1000,Wait 1 second
+SELECT,1,Select Hurricane
+SKILL,3,Use Skill#3 Concentrated Fire
+DESELECT,1,Deselect Hurricane
+SELECT,3,Select MC-200
+MOVE,3,Move MC-200 back to grid 3
+DESELECT,3,Deselect MC-200
+BATTLE,,Start this turn
+CONFIRM,,Confirm unspent points
+WAIT,1000,
+SELECT,1,<---- w Recon Start (Turn 4)
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends
+SELECT,1, <---- w/o Recon (Turn 5)
+SKILL,3,
+DESELECT,1,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w/o Recon Ends
+SELECT,1,<---- w Recon Start (Turn 6)
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends
+SELECT,1, <---- w/o Recon (Turn 7)
+SKILL,3,
+DESELECT,1,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w/o Recon Ends
+SELECT,1,<---- w Recon Start
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends
+SELECT,1, <---- w/o Recon
+SKILL,3,
+DESELECT,1,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w/o Recon Ends
+SELECT,1,<---- w Recon Start
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends
+SELECT,1, <---- w/o Recon
+SKILL,3,
+DESELECT,1,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w/o Recon Ends
+SELECT,1,<---- w Recon Start
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends
+SELECT,1, <---- w/o Recon
+SKILL,3,
+DESELECT,1,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w/o Recon Ends
+SELECT,1,<---- w Recon Start
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends
+SELECT,1, <---- w/o Recon
+SKILL,3,
+DESELECT,1,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w/o Recon Ends
+SELECT,1,<---- w Recon Start (Turn 16)
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends (Boss should be dead here)
+SELECT,1, <---- w/o Recon
+SKILL,3,
+DESELECT,1,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w/o Recon Ends
+SELECT,1,<---- w Recon Start
+SKILL,3,
+DESELECT,1,
+SELECT,2,
+SKILL,2,
+DESELECT,2,
+BATTLE,,
+CONFIRM,,
+WAIT,1000,<---- w Recon Ends
