@@ -21,8 +21,13 @@ This script relies on AutoHotKey to run, and you can download AHK at https://www
 
 
 # How to use
+Download the compiled AHK script from https://github.com/Kaidrick/AshArmsHelper/releases.
 Open `emulator window title.ini` and change the text to the window title of the emulator of your choice. Save the file in UTF-8-BOM.
-Click and drag `AshArmsHelper.ahk` file on AutoHotkeyU64.exe (or use your own copy of AHK)
+Run AshArmsHelper.exe to start.
+
+or
+
+Click and drag `AshArmsHelper.ahk` file on your own copy of AutoHotkeyU64.exe
 ![Open AHK](docs/emulator_test_pic_2.gif)
 
 
