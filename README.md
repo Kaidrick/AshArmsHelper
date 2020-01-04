@@ -22,7 +22,9 @@ This script relies on AutoHotKey to run, and you can download AHK at https://www
 
 # How to use
 Download the compiled AHK script from https://github.com/Kaidrick/AshArmsHelper/releases.
+
 Open `emulator window title.ini` and change the text to the window title of the emulator of your choice. Save the file in UTF-8-BOM.
+
 Run AshArmsHelper.exe to start.
 
 or
