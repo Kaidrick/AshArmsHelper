@@ -1,4 +1,4 @@
-# 灰咕咕自动周回脚本
+# 灰烬战线 自动周回脚本
 你究竟能从无尽的周回肝碎片中脱身吗？
 
 **将根目录下的`lang.ini`内的`en-US`修改为`zh-CN`来启用中文界面！**
@@ -19,11 +19,21 @@
 
 **注意，模拟器必须设置为720P（分辨率1280 \* 720）才能正常使用脚本，因为脚本大量使用了图像搜索功能，而用于搜索的图像源的尺寸不能随着窗口尺寸而改变，至少现在不能**
 
-你需要AutoHotKey软件来运行脚本，你可以在 https://www.autohotkey.com/ 下载AHK
 
 
 # 如何使用
-在`emulator window title.ini`文件中填写模拟器窗口的标题，保存为UTF-8-BOM编码
+
+
+从此处下载已编译的AHK可执行文件 https://github.com/Kaidrick/AshArmsHelper/releases 。
+
+在`emulator window title.ini`文件中填写模拟器窗口的标题，保存为UTF-8-BOM编码。
+
+双击AshArmsHelper.exe来运行脚本。
+
+
+或者
+
+
 点击并拖动`AshArmsHelper.ahk`文件至AutoHotkeyU64.exe图标上以运行
 ![Open AHK](docs/emulator_test_pic_2.gif)
 
@@ -134,31 +144,59 @@
 
 例如：
 `DESC,F4F/INTC,,,,ホイシュレッケ/LRNG,,,,ホイシュレッケ,グリレH型,IV号対空戦車ヴィルベルヴィント,M10ウルヴァリン,88mmFlaK36アハトアハト`
-"/"告诉脚本检查技能组选项。INTC表示“迎击型”（拦截）。所以按下出击按钮前，脚本会检查F4F的技能组知否设置成了“迎击型”。
+
+"/"告诉脚本检查技能组选项。INTC表示“迎击型”（拦截）。按下出击按钮前，脚本会检查F4F的技能组知否设置成了“迎击型”。
+
+脚本不会检查单位是否是“F4F”，因此你可以写成
+
+`DESC,/INTC,,,,Grasshopper/LRNG,,,,,,,`
+
 这些选项可以通过4个英文字母或者单个英文字母的缩写来表示：
 
+
 战斗机/轻型攻击机
+
 INTC or I - 迎击型
+
 ASUP or S - 制空型
+
 ACOM or C - 空战型
+
 RECC or R - 侦察型
+
 GATK or G - 对地型
 
+
+
 火炮
+
 FRSP or F - 火力型
+
 LRNG or L - 长射程型
 
+
+
 驱逐战车（反坦克炮）
+
 SNIP or P - 邀击型
 
 轻型坦克
+
 ASLT or A - 突击型
+
 FRLN or B - 前线型
+
 RNGR or V - 游击型
 
+
+
 中/重型轰炸机
+
 STRG or W - 战略编队
+
 TACT or T - 战术编队
+
+
 
 其他技能组还在WIP
 
@@ -168,4 +206,5 @@ TACT or T - 战术编队
 ![User Interface](docs/emulator_test_pic_4.gif)
 
 仍然处于开发中的功能。无法保证准确性。需要大量图片数据支持来对情报碎片和掉落材料进行图片搜索。
+
 每场战斗的掉落信息会存储在一个\*.csv文件中，你可以将它导入至Excel内。

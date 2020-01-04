@@ -17,12 +17,19 @@ This script implements random clicks coordinates and time before each click oper
 
 **Notice that you have to start the android emulator of your choice in 720P (1280 * 720) for the script to run properly because it relies heavily on image search functions, and the image to be used cannot be rescaled with the window, at least for now.**
 
-This script relies on AutoHotKey to run, and you can download AHK at https://www.autohotkey.com/
 
 
 # How to use
+
+Download the compiled AHK script from https://github.com/Kaidrick/AshArmsHelper/releases.
+
 Open `emulator window title.ini` and change the text to the window title of the emulator of your choice. Save the file in UTF-8-BOM.
-Click and drag `AshArmsHelper.ahk` file on AutoHotkeyU64.exe (or use your own copy of AHK)
+
+Run AshArmsHelper.exe to start.
+
+or
+
+Click and drag `AshArmsHelper.ahk` file on your own copy of AutoHotkeyU64.exe
 ![Open AHK](docs/emulator_test_pic_2.gif)
 
 
@@ -132,29 +139,48 @@ Option is the role of a unit. It could be Ground Attack or Air Superiority or Lo
 
 For example:
 `DESC,F4F/INTC,,,,ホイシュレッケ/LRNG,,,,ホイシュレッケ,グリレH型,IV号対空戦車ヴィルベルヴィント,M10ウルヴァリン,88mmFlaK36アハトアハト`
-"/" tell the script to check for role options. INTC means Intercept. So the script will check if F4F's option is set correctly before hitting the READY button.
+
+"/" tell the script to check for role options. 
+
+INTC means Intercept. So the script will check if F4F's option is set correctly before hitting the READY button.
+
 These options can be expressed in a four-letter or shorthanded one-letter acronym:
 
 Fighter/Light Attacker
+
 INTC or I - Intercept
+
 ASUP or S - Air Superiority
+
 ACOM or C - Air Combat
+
 RECC or R - Recon
+
 GATK or G - Ground Attack
 
 Artillery
+
 FRSP or F - Fire Support
+
 LRNG or L - Long Range
+
 SNIP or P - Sniper
 
 Light Tank
+
 ASLT or A - Assault
+
 FRLN or B - Frontline
+
 RNGR or V - Ranger
 
+
 Medium/Heavy Bomber
+
 STRG or W - Strategic Formation
+
 TACT or T - Tactical Formation
+
 
 Other Options are WIP
 
@@ -163,5 +189,8 @@ Other Options are WIP
 
 ![User Interface](docs/emulator_test_pic_4.gif)
 
-This is a highly WIP function. Accuracy is not guaranteed in any means. It also needs a tons of images to be able to do image searches on each type of materials and doll intell fragments.
+This is a highly WIP function. Accuracy is not guaranteed in any means. 
+
+It also needs a tons of images to be able to do image searches on each type of materials and doll intell fragments.
+
 The result for each battle is saved to an \*.csv file for later analysis.
