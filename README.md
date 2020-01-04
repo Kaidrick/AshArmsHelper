@@ -1,6 +1,6 @@
 [点此阅读简体中文版说明](README_CN.md)
 
-# AshArmsHelper
+# Ash Arms Helper
 Free yourself from the endless grinding! Hopefully?
 
 ![User Interface](docs/helper_view.png)
@@ -124,3 +124,39 @@ There is also an `AUTO,,`
 No need to explain that.
 
 
+# Unit Role Option Check
+If you write your DESC entry correctly in the flow files, the script will try to check if the unit on each position is using the proper option.
+Option is the role of a unit. It could be Ground Attack or Air Superiority or Long Range Fire Support, etc.
+
+For example:
+`DESC,F4F/INTC,,,,ホイシュレッケ/LRNG,,,,ホイシュレッケ,グリレH型,IV号対空戦車ヴィルベルヴィント,M10ウルヴァリン,88mmFlaK36アハトアハト`
+"/" tell the script to check for role options. INTC means Intercept. So the script will check if F4F's option is set correctly before hitting the READY button.
+These options can be expressed in a four-letter or shorthanded one-letter acronym:
+
+Fighter/Light Attacker
+INTC or I - Intercept
+ASUP or S - Air Superiority
+ACOM or C - Air Combat
+RECC or R - Recon
+GATK or G - Ground Attack
+
+Artillery
+FRSP or F - Fire Support
+LRNG or L - Long Range
+SNIP or P - Sniper
+
+Light Tank
+ASLT or A - Assault
+FRLN or B - Frontline
+RNGR or V - Ranger
+
+Medium/Heavy Bomber
+STRG or W - Strategic Formation
+TACT or T - Tactical Formation
+
+Other Options are WIP
+
+
+# Loot Recorder
+This is a highly WIP function. Accuracy is not guaranteed in any means. It also needs a tons of images to be able to do image searches on each type of materials and doll intell fragments.
+The result for each battle is saved to an \*.csv file for later analysis.

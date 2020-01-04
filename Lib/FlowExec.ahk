@@ -12,13 +12,15 @@ earlyTermination = false
 
 ; This file contains a few function to execute pre-defined battle flow provided in json files
 executeFlow(flowName) {
+	global resx
+	
 	; find file by name, and then read the file. convert json to ahk object
 	;~ MsgBox % flowName
 	global WinSize
 	global clickNoDelay
 	global earlyResult
 	
-	GuiControl,, WinSize, % "Executing predefined battle flow..."
+	GuiControl,, WinSize, % resx["status_FlowExecStart"]
 	
 	numLines = 0
 	idx = 0
@@ -53,7 +55,7 @@ executeFlow(flowName) {
 				if(action != "INFO" && action != "DESC") {
 					idx++
 					;~ MsgBox, Field number %A_Index% is %A_LoopField%.
-					GuiControl,, WinSize, % "Executing predefined battle flow..." idx "/" numLines
+					GuiControl,, WinSize, % resx["status_FlowExecutingAt"] idx "/" numLines
 					
 					perform(action, args, desc)
 				}
@@ -61,7 +63,7 @@ executeFlow(flowName) {
 		}
 	}
 	
-	GuiControl,, WinSize, % "Finished predefined battle flow"
+	GuiControl,, WinSize, % resx["status_FlowExecEnd"]
 	
 	return
 }
@@ -83,13 +85,15 @@ executeFlow(flowName) {
 
 
 perform(action, args="", desc="") {
+	global resx
+	
 	;~ MsgBox, % action args desc
 	global canRun
 	global ClickPosIndicator
 	global clickNoDelay
 	global stdWaitTime
 	
-	GuiControl,, ClickPosIndicator, % "Command: " action ", " args "`nOperation: " desc
+	GuiControl,, ClickPosIndicator, % resx["pos_FlowCmd"] action ", " args "`n" resx["pos_FlowOps"] desc
 	
 	checkForError()
 	checkLoginOnBadAuth()

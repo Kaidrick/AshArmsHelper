@@ -9,6 +9,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ; Simulated Human Behaviors
 simulateRandomBehavior() {
+	global resx
+	
 	; This function is used to simulate human behavior such as bio break or afk
 	
 	; other possible behavior:
@@ -36,14 +38,14 @@ simulateRandomBehavior() {
 	if (longSessionBreak) {
 		
 		if (runCount > 0 && Mod(runCount, 60) = 0) {  ; if runCount % 60 == 0, that is, runCount is 60 or 120 or 180...
-			changeStatusText("Long Sleep...")
+			changeStatusText(resx["status_LongSleep"])
 			GuiControl, Show, WakeButton
 			
 			tElapsed = 0
 			while(true) {
 				Sleep 1000
 				tElapsed++  ; sleep 4 hours to simulate sleep, need more work
-				changeStatusText("Long Sleep..." tElapsed "s elapsed")
+				changeStatusText(resx["status_LongSleepCount_LongSleep"] tElapsed resx["pos_BehaviorUnitSeconds"] resx["status_LongSleepCount_Elapsed"])
 				if(tElapsed > 14400) { 
 					GuiControl, Hide, WakeButton
 					skipSleep := false
@@ -68,7 +70,7 @@ simulateRandomBehavior() {
 	
 	;~ MsgBox % "Triggered behavior: " behavior["name"] ", base pause time is " baseLength " seconds, processed pause time is " fBehaviorLength
 	
-	GuiControl,, ClickPosIndicator, % "Triggered behavior: " behavior["name"] "`nBase time " baseLength "s`nProcessed pause time " fBehaviorLength "s"
+	GuiControl,, ClickPosIndicator, % resx["pos_TriggeredBehavior"] behavior["name"] "`n" resx["pos_BehaviorBaseTime"] baseLength resx["pos_BehaviorUnitSeconds"] "`n" resx["pos_BehaviorProsTime"] fBehaviorLength resx["pos_BehaviorUnitSeconds"]
 	
 	;~ Sleep fBehaviorLength * 1000  ; to milliseconds1 / 60
 	
@@ -93,7 +95,7 @@ simulateRandomBehavior() {
 		Sleep 1000
 		
 		ptCount++  ; increment
-		changeStatusText("Random Pause..." ptCount "s elapsed")
+		changeStatusText(resx["status_RandomPause"] ptCount resx["pos_BehaviorUnitSeconds"] resx["status_RandomPauseElapsed"])
 		
 		if(skipSleep) {
 			;~ wake up now

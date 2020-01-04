@@ -13,6 +13,8 @@ matsRelativePath := "\items\"
 
 
 collectDollDropData() {
+	global resx
+	
 	global dollImgPath
 	global dollRelativePath
 	
@@ -29,7 +31,7 @@ collectDollDropData() {
 	Loop %path% {
 		idx := idx + 1
 		dollName := StrSplit(A_LoopFileName, ".")[1]
-		changeStatusText("Matching...#" idx " " dollName )
+		changeStatusText(resx["status_MatchingDrops"] "#" idx " " dollName )
 		;~ if (existFuzzImage(dollRelativePath A_LoopFileName,228,197,1093,564,10,2,50)) {
 		if (existFuzzImage(dollRelativePath A_LoopFileName,228,197,1093,564,5,1,100)) {
 			if(drops = "") {
@@ -44,6 +46,8 @@ collectDollDropData() {
 }
 
 collectMatsDropData() {
+	global resx
+	
 	global matsImgPath
 	global matsRelativePath
 	
@@ -60,7 +64,7 @@ collectMatsDropData() {
 	Loop %path% {
 		idx := idx + 1
 		matsName := StrSplit(A_LoopFileName, ".")[1]
-		changeStatusText("Matching...#" idx " " matsName )
+		changeStatusText(resx["status_MatchingDrops"] "#" idx " " matsName )
 		if (existFuzzImage(matsRelativePath A_LoopFileName,228,197,1093,564,5,1,110)) {
 			if(drops = "") {
 				drops := drops matsName

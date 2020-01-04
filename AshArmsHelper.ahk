@@ -19,6 +19,13 @@ FileEncoding, UTF-8
 ; 3. validate clicks; that is, check if click is successfual / UI is responsive for this click; if not, retry      
 ; 
 
+LC_path := A_ScriptDir "\lang.ini"
+FileReadLine, LC, %LC_path%, 1
+textResFile := A_ScriptDir "\res\" LC ".json"
+FileRead, resxJson, %textResFile%
+resx := JSON.Load(resxJson)
+
+
 eop_path := A_ScriptDir "\emulator window title.ini"
 FileReadLine, emulatorWindowTitle, %eop_path%, 1
 
@@ -33,10 +40,10 @@ yBorder = 36  ; NemuPlayer
 stdErrorRange = 12.0  ; max distance from the click point to the base point in px
 
 ; Create GUI control panel
-clickPos := "Click Position"
-workStatus := "Starting"
-winSize := "Target Window Size"
-statsRun := "Stats"
+clickPos := resx["s_ClickPos"]
+workStatus := resx["s_WorkStatus"]
+winSize := resx["s_WinSize"]
+statsRun := resx["s_StatsRun"]
 
 winResolutionWidth := 1280
 winResolutionHeight := 720
@@ -68,14 +75,13 @@ Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
 Gui, Add, Text, x5 y45 h48 w450 vClickPosIndicator, %clickPos%
 Gui, Add, Text, x220 y5 h14 w100 vRunNum, %statsRun%
 
-Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"aua
+Gui, Show, w292 h378, % resx["title"] ; "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"
 
-Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % "Start"
-Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % "Stop"
+Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % resx["btn_Start"]
+Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % resx["btn_Stop"]
 ;~ Gui, Add, Button, x5 y180 h16 w100 gTapTap, % "Test"
 
-Gui, Add, Text, x5 y200 h170 w450 vStageInstruction, % "Select a stage from the droplist"
-
+Gui, Add, Text, x5 y200 h170 w450 vStageInstruction, % resx["info_SelectStage"]
 ; add as per file
 path := A_ScriptDir "\data\flow\*.txt"
 files =
@@ -88,22 +94,22 @@ Gui, Add, Text, x5 y90 h10 w450 vBr1, % "—————————————
 
 Gui, Add, DropDownList, x5 y105 vStageChoiceNew gOnStageSelectNew w280 h50 Choose1 R10, %files%
 
-Gui, Add, CheckBox, x110 y130 h16 w95 vCB_Nonstop gNonStop, % "Non-stop Mode"
+Gui, Add, CheckBox, x110 y130 h16 w95 vCB_Nonstop gNonStop, % resx["cb_NonStop"]
 
-Gui, Add, CheckBox, x210 y130 h16 w95 vCB_LogDrops gLogDrops, % "Log Drops"
+Gui, Add, CheckBox, x210 y130 h16 w95 vCB_LogDrops gLogDrops, % resx["cb_LogDrops"]
 
-Gui, Add, CheckBox, x110 y147 h16 w95 vCB_NoDelay gNoDelay, % "Click No Delay"
+Gui, Add, CheckBox, x110 y147 h16 w95 vCB_NoDelay gNoDelay, % resx["cb_ClickNoDelay"]
 
 ;~ Gui, Add, CheckBox, x115 y130 h26 w150 vCB_ForceClick gForceClick, % "[WIP] Silent Mode (Coord and Time only)"
 ;~ GuiControl, Disable, CB_ForceClick
 
-Gui, Add, Checkbox, x110 y164 h16 w200 gLongSession, % "Sleep Session"
+Gui, Add, Checkbox, x110 y164 h16 w200 gLongSession, % resx["cb_SleepSession"]
 
 Gui, Add, Button, x150 y5 h15 w30 vWakeButton gWakeUpNow, % "▶▶"
 GuiControl, Hide, WakeButton
 
 
-GuiControl,, ClickPosIndicator, % "Ready"
+GuiControl,, ClickPosIndicator, % resx["info_ClickPosReady"]
 GuiControl, Disable, StopButton
 
 
@@ -140,11 +146,11 @@ limitRuns = 0
 WinGet, asaGameHwnd, ID, %emulatorWindowTitle%
 
 if (asaGameHwnd) {
-	GuiControl,, WorkStatusIndicator, % "Emulator HWND: " + asaGameHwnd
+	GuiControl,, WorkStatusIndicator, % resx["emulator_hwnd"] asaGameHwnd
 	
 	; get window resolution at start
 	WinGetPos,,, winResolutionWidth, winResolutionHeight, ahk_id %asaGameHwnd%
-	GuiControl,, WinSize, Initial Window Size: %winResolutionWidth% x %winResolutionHeight%
+	GuiControl,, WinSize, % resx["InitWindowSize"] winResolutionWidth "x" winResolutionHeight
 } else {
 	MsgBox, Unable to locate Ash Arms emulator window.`rPlease make sure the emulator is running properly.`rScript will now terminate.
 	ExitApp
@@ -203,7 +209,11 @@ drop4 := descInfo[13]
 drop5 := descInfo[14]
 drop6 := descInfo[15]
 
-GuiControl,, StageInstruction, Team Composition:`nA: [1]%pos1%`t [2]%pos2%`t [3]%pos3%`t [4]%pos4%`nG: [1]%pos5%`t [2]%pos6%`t [3]%pos7%`t [4]%pos8%`n----------------`nDrops: `n%drop1% [25`%]`n%drop2% [10`%]`n%drop3% [6`%]`n%drop4% [2.5`%]`n----------------`nRare Drops:`n%drop5% [10`%]`n%drop6% [1`%]
+strTeamComp := resx["desc_TeamComp"]
+strDrops := resx["desc_Drops"]
+strRareDrops := resx["desc_RareDrops"]
+
+GuiControl,, StageInstruction, %strTeamComp%`nA: [1]%pos1%`t [2]%pos2%`t [3]%pos3%`t [4]%pos4%`nG: [1]%pos5%`t [2]%pos6%`t [3]%pos7%`t [4]%pos8%`n----------------`n%strDrops%`n%drop1% [25`%]`n%drop2% [10`%]`n%drop3% [6`%]`n%drop4% [2.5`%]`n----------------`n%strRareDrops%`n%drop5% [10`%]`n%drop6% [1`%]
 
 return
 
@@ -271,7 +281,7 @@ if(previousRunCount != 0) {
 	previousRunCount = 0
 }
 
-GuiControl,, RunNum, % "Round: " runCount
+GuiControl,, RunNum, % resx["round"] runCount
 
 ; run the process
 BigSwitchOn()
@@ -295,7 +305,7 @@ while(true) {
 	
 	
 }
-changeStatusText("Script stopped.")
+changeStatusText(resx["status_ScriptStop"])
 GuiControl, Enable, MasterButton
 
 
@@ -306,7 +316,7 @@ if(canRestart) {
 	canRestart := false
 	isRepeatTask := false
 
-	changeStatusText("Script restarting")
+	changeStatusText(resx["status_ScriptRestart"])
 	gosub MasterRoutine
 }
 return
@@ -336,7 +346,7 @@ if(canRun) {
 	
 	if(!isRepeatTask) {
 		;~ MsgBox, New Task
-		changeStatusText("Dispatch new task: " + selStageName)
+		changeStatusText(resx["status_DispatchNew"] selStageName)
 		gosub GrindStart  ; start from home page
 
 		rWait := NormalRand(0, stdWaitTime, 0)
@@ -367,7 +377,7 @@ if(canRun) {
 				break
 			}
 		
-			changeStatusText("Ensuring Stage Loading")
+			changeStatusText(resx["status_EnsuringLoad"])
 		
 			handleGeneralError()  ; dealing with errors
 			checkLoginOnBadAuth()  ; dealing with login problems
@@ -379,7 +389,7 @@ if(canRun) {
 		
 		;~ button is pressed for sure, but network errors may occur
 		;~ wait until battle button shows up
-		changeStatusText("Loading...")
+		changeStatusText(resx["status_Loading"])
 		;~ if start button is not seen then keep handling errors here
 		
 		loaded := existImage("battleView_BattleStart.png")
@@ -407,7 +417,7 @@ if(canRun) {
 			quickTapAnywhere(3)
 			
 			existImage("Result_Loot.png",,,,,,0)  ;~ check for got item title
-			changeStatusText("Ready to analyze drops")
+			changeStatusText(resx["status_AnalyzeDrops"])
 			Sleep 2000
 			;~ check drops
 			dollDrop := collectDollDropData()
@@ -430,7 +440,7 @@ if(canRun) {
 		isRepeatTask := true
 		
 		runCount++
-		GuiControl,, RunNum, % "Round: " runCount
+		GuiControl,, RunNum, % resx["round"] runCount
 	} else {
 		;~ start from result page
 		findClick("repeatStageFromBattleResult")  
@@ -451,7 +461,7 @@ if(canRun) {
 				break
 			}
 		
-			changeStatusText("Ensuring Stage Loading")
+			changeStatusText(resx["status_EnsuringLoad"])
 		
 			handleGeneralError()  ; dealing with errors
 			checkLoginOnBadAuth()  ; dealing with login problems
@@ -463,7 +473,7 @@ if(canRun) {
 		
 		;~ button is pressed for sure, but network errors may occur
 		;~ wait until battle button shows up
-		changeStatusText("Loading...")
+		changeStatusText(resx["status_Loading"])
 		;~ if start button is not seen then keep handling errors here
 		
 		loaded := existImage("battleView_BattleStart.png")
@@ -492,7 +502,7 @@ if(canRun) {
 			quickTapAnywhere(3)
 			
 			existImage("Result_Loot.png",,,,,,0)  ;~ check for got item title
-			changeStatusText("Ready to analyze drops")
+			changeStatusText(resx["status_AnalyzeDrops"])
 			Sleep 2000
 			;~ check drops
 			dollDrop := collectDollDropData()
@@ -514,7 +524,7 @@ if(canRun) {
 		isRepeatTask := true
 		
 		runCount++
-		GuiControl,, RunNum, % "Round: " runCount
+		GuiControl,, RunNum, % resx["round"] runCount
 	}
 
 } else {
@@ -533,6 +543,8 @@ return
 
 
 BigSwitchOn() {
+	global resx
+	
 	global canRun
 	global isRepeatTask
 	global MasterButton
@@ -540,7 +552,7 @@ BigSwitchOn() {
 	global StageChoiceNew
 	
 	if (StageChoiceNew = "") {
-		MsgBox % "Choose a stage from the list before clicking on Start button."
+		MsgBox % resx["msgbox_SelectStageNotice"]
 		return
 	}
 	
@@ -556,6 +568,8 @@ BigSwitchOn() {
 }
 
 BigSwitchOff() {
+	global resx
+	
 	global canRun
 	global isRepeatTask
 	global StopButton
@@ -568,7 +582,7 @@ BigSwitchOff() {
 	GuiControl, Disable, StopButton
 	GuiControl, Enable, StageChoiceNew
 	GuiControl, Hide, WakeButton
-	changeStatusText("Stopping...")
+	changeStatusText(resx["status_Stopping"])
 	;~ Reload
 	return
 }

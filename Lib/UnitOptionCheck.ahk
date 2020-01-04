@@ -7,6 +7,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #Include Lib\JSON.ahk
 
 matchOptions(descInfo) {
+	global resx
+	
 	FileRead, optionJson, UnitOptionData.json
 	optionData := JSON.Load(optionJson)
 	
@@ -20,7 +22,7 @@ matchOptions(descInfo) {
 	if (a1 != "") {
 		optionImgPath := optionData[a1]
 		if(!existImage(optionImgPath,255,276,296,317,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Air Unit #1 -> " a1 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Air"] "#1 -> " a1 "`n"
 		}
 	}
 	
@@ -28,7 +30,7 @@ matchOptions(descInfo) {
 	if (a2 != "") {
 		optionImgPath := optionData[a2]
 		if(!existImage(optionImgPath,399,276,440,317,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Air Unit #2 -> " a2 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Air"] "#2 -> " a2 "`n"
 		}
 	}
 	
@@ -36,7 +38,7 @@ matchOptions(descInfo) {
 	if (a3 != "") {
 		optionImgPath := optionData[a3]
 		if(!existImage(optionImgPath,544,276,584,317,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Air Unit #3 -> " a3 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Air"] "#3 -> " a3 "`n"
 		}
 	}
 	
@@ -44,7 +46,7 @@ matchOptions(descInfo) {
 	if (a4 != "") {
 		optionImgPath := optionData[a4]
 		if(!existImage(optionImgPath,688,276,728,317,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Air Unit #4 -> " a4 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Air"] "#4 -> " a4 "`n"
 		}
 	}
 	
@@ -53,7 +55,7 @@ matchOptions(descInfo) {
 	if (g1 != "") {
 		optionImgPath := optionData[g1]
 		if(!existImage(optionImgPath,255,493,297,534,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Ground Unit #1 -> " g1 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Ground"] "#1 -> " g1 "`n"
 		}
 	}
 	
@@ -61,7 +63,7 @@ matchOptions(descInfo) {
 	if (g2 != "") {
 		optionImgPath := optionData[g2]
 		if(!existImage(optionImgPath,399,494,441,533,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Ground Unit #2 -> " g2 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Ground"] "#2 -> " g2 "`n"
 		}
 	}
 	
@@ -69,7 +71,7 @@ matchOptions(descInfo) {
 	if (g3 != "") {
 		optionImgPath := optionData[g3]
 		if(!existImage(optionImgPath,543,493,585,535,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Ground Unit #3 -> " g3 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Ground"] "#3 -> " g3 "`n"
 		}
 	}
 	
@@ -77,16 +79,16 @@ matchOptions(descInfo) {
 	if (g4 != "") {
 		optionImgPath := optionData[g4]
 		if(!existImage(optionImgPath,688,494,727,534,100,2)) {
-			wStr := wStr "Wrong Unit Option -> Ground Unit #4 -> " g4 "`n"
+			wStr := wStr resx["msgbox_RoleOptionCheck_Ground"] "#4 -> " g4 "`n"
 		}
 	}
 	
 	if (wStr = "") {
-		changeStatusText("Units Option Check...Pass")
+		changeStatusText(resx["msgbox_RoleOptionCheck_Pass"])
 	} else {
-		changeStatusText("Units Option Check...Fail")
+		changeStatusText(resx["msgbox_RoleOptionCheck_Fail"])
 		MsgBox % wStr
-		changeStatusText("Script will stop now.")
+		changeStatusText(resx["msgbox_RoleOptionCheck_ScriptStop"])
 		;~ stop the script
 		BigSwitchOff()
 	}

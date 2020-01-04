@@ -15,6 +15,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 p := Gdip_Startup()
 
 findClick(viewObjName, abortCount=1000, waitInterval=200, canSimulateHumanBehavior=false) {
+	global resx
+	
 	global asaGameHwnd
 	global ClickPosIndicator
 	global stdWaitTime
@@ -126,7 +128,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=200, canSimulateHumanBehavi
 			yClick := y + hH + yOffset + yRand ;+ yBorder  ; maybe yBorder is not needed when using gdip? idk
 			act := viewObj["act"]
 			
-			changeStatusText("Searching for [" viewObj["path"] "]...success!")
+			changeStatusText(resx["status_ImageSearch_Searching"] "[" viewObj["path"] "]" resx["status_ImageSearch_Success"])
 			
 			; first click then wait?
 			; random sleep
@@ -153,12 +155,12 @@ findClick(viewObjName, abortCount=1000, waitInterval=200, canSimulateHumanBehavi
 		}
 		
 		retryCount++
-		GuiControl,, WinSize, % "Searching for [" viewObj["path"] "], iters:" retryCount
+		GuiControl,, WinSize, % resx["status_ImageSearch_Searching"] "[" viewObj["path"] "]" resx["status_ImageSearch_Iters"] retryCount
 		Sleep waitInterval
 		
 		if (retryCount >= abortCount) {
 			; abort
-			changeStatusText("Search limit reached for " viewObj["path"] "...skip")
+			changeStatusText(resx["status_ImageSearch_Limit"] viewObj["path"] resx["status_ImageSearch_Skip"])
 			return
 		}
 		
@@ -713,6 +715,8 @@ checkForError() {
 
 ; check for kicked error -> bad auth
 checkLoginOnBadAuth() {
+	global resx
+	
 	global canRun
 	global canRestart
 	global runCount
@@ -732,11 +736,11 @@ checkLoginOnBadAuth() {
 		
 		if (titleScreen) {
 			;~ tap to start
-			changeStatusText("Auth expired. Try to re-login...")
+			changeStatusText(resx["err_AuthExp"])
 			quickTapAnywhere(1)
 			Sleep 1000
 		} else {
-			changeStatusText("Login Success")
+			changeStatusText(resx["status_LoginSuccess"])
 			Sleep 5000
 			
 			handleGeneralError()
@@ -760,7 +764,7 @@ checkLoginOnBadAuth() {
 			
 			; TODO !!!
 			; set canRestart and canRun
-			changeStatusText("Restarting the script run...")
+			changeStatusText(resx["status_ScriptRestarting"])
 			
 			;~ copy current runCount
 			previousRunCount = runCount
@@ -840,16 +844,17 @@ checkLoginOnBadAuth() {
 
 
 disableAutoBattle() {  ;~ this function only needs to be called on the first run
+	global resx
 	
 	global yBorder
 	
 	;~ search image to check if auto battle option is checked
 	;~ if so, uncheck it
-	changeStatusText("Ensuring Auto Battle option is unchecked...")
+	changeStatusText(resx["status_DisableAuto"])
 	autoBattle := existImage("Option_AutoBattle.png", 1129, 615, 1250, 699, 200, 5)
 	if (autoBattle) {
 		;~ click to uncheck the option
-		ExecClick("Unchecking Auto Battle", 1193, 641 + yBorder, 0, false)
+		ExecClick(resx["status_UncheckAuto"], 1193, 641 + yBorder, 0, false)
 		
 		Sleep 500
 	}
