@@ -1,0 +1,8 @@
+# User-specific files
+*.bak
+
+# Logs
+logs/
+
+# Obsolete codes
+obsolete/

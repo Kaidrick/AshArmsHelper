@@ -15,11 +15,15 @@ executeFlow(flowName) {
 	; find file by name, and then read the file. convert json to ahk object
 	;~ MsgBox % flowName
 	global WinSize
+	global clickNoDelay
+	global earlyResult
 	
 	GuiControl,, WinSize, % "Executing predefined battle flow..."
 	
 	numLines = 0
 	idx = 0
+	
+	earlyResult := false
 	
 	Loop, read, %flowName%
 	{
@@ -82,6 +86,9 @@ perform(action, args="", desc="") {
 	;~ MsgBox, % action args desc
 	global canRun
 	global ClickPosIndicator
+	global clickNoDelay
+	global stdWaitTime
+	
 	GuiControl,, ClickPosIndicator, % "Command: " action ", " args "`nOperation: " desc
 	
 	checkForError()
@@ -89,6 +96,12 @@ perform(action, args="", desc="") {
 	
 	if(!canRun) {
 		return
+	}
+	
+	if(!clickNoDelay) {
+		; random sleep
+		tPause := NormalRand(0, stdWaitTime, 0)
+		Sleep tPause * 1000
 	}
 	
 	switch action {
@@ -110,7 +123,7 @@ perform(action, args="", desc="") {
 			; click start battle, battleView_ClearAssignment.png, Wait until clear button is gone
 			battleView_StartTurn()
 		case "WAIT":
-			Sleep args
+			battleView_Wait(args)
 		case "CHECK":
 			; search for image
 		case "AUTO":
@@ -126,15 +139,44 @@ perform(action, args="", desc="") {
 }
 
 
+battleView_Wait(args) {
+	if(hasEarlyResult()) {
+		return
+	}
+	Sleep args
+}
+
+
 battleView_Select(index=1) {
-	handleGeneralError()  ; dealing with errors
-	checkLoginOnBadAuth()  ; dealing with login problems
+	global canRun
+	
+	if(hasEarlyResult()) {
+		return
+	}
+	
+	;~ while battle start button is not seen, check for errors
+	hasTurn := existImage("battleView_BattleStart.png")
+	while(!hasTurn) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return
+		}
+	
+		if(hasEarlyResult()) {
+			return
+		}
+	
+		handleGeneralError()  ; dealing with errors
+		checkLoginOnBadAuth()  ; dealing with login problems
+		
+		hasTurn := existImage("battleView_BattleStart.png")
+	}
 	
 	;~ GuiControl,, WinSize, % "Coord Click Mode"
 	existImage("battleView_BattleStart.png",,,,,,0)  ; must see
 	if(hasEarlyResult()) {
-			return
-		}
+		return
+	}
 		
 	switch index {
 		case 1: coordClick(113, 638)
@@ -147,6 +189,10 @@ battleView_Select(index=1) {
 }
 
 battleView_Deselect(index) {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	notExistImage("battleView_BattleStart.png")
 	if(hasEarlyResult()) {
 			return
@@ -165,6 +211,10 @@ battleView_Deselect(index) {
 }
 
 battleView_Move(index) {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	notExistImage("battleView_BattleStart.png")
 	if(hasEarlyResult()) {
 			return
@@ -183,6 +233,10 @@ battleView_Move(index) {
 }
 
 battleView_Switch() {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	; find and click the image?
 	notExistImage("battleView_BattleStart.png")
 	if(hasEarlyResult()) {
@@ -192,6 +246,10 @@ battleView_Switch() {
 }
 
 battleView_Skill(index) {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	notExistImage("battleView_BattleStart.png")
 	if(hasEarlyResult()) {
 			return
@@ -204,6 +262,10 @@ battleView_Skill(index) {
 }
 
 battleView_StartTurn() {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	; check clear button is gone and then click start turn
 	notExistImage("battleView_ClearAssignment.png")
 	if(hasEarlyResult()) {
@@ -213,18 +275,22 @@ battleView_StartTurn() {
 }
 
 battleView_Confirm() {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	existImage("battleView_ConfirmTurn.png",,,,,,0)  ; must see
 	if(hasEarlyResult()) {
 			return
 		}
 	coordClick(1052, 343)
-	
-	Sleep 5000
-	handleGeneralError()  ; dealing with errors
-	checkLoginOnBadAuth()  ; dealing with login problems
 }
 
 battleView_SkipTurn() {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	;~ skill this turn without doing anything
 	;~ if start turn image exists, click on it
 	existImage("battleView_BattleStart.png",,,,,,0)
@@ -264,6 +330,10 @@ battleView_CheckWin() {
 
 
 battleView_Auto() {
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	existImage("battleViewWithdraw.png",,,,,,0)  ; must see
 	if(hasEarlyResult()) {
 		return
@@ -295,11 +365,6 @@ coordClick(x, y) {
 	}
 	
 	;~ GuiControl,, clickPosIndicator, x = %x%`, y = %y%`, Action -> %act%, Click Time Offset -> %tPause%s
-	
-	if(hasEarlyResult()) {
-		return
-	}
-	
 	ControlClick, x%xClick% y%yClick%, ahk_id %asaGameHwnd%,, left  ; do click
 	
 	return

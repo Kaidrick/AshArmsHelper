@@ -13,7 +13,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; Functions
 p := Gdip_Startup()
 
-findClick(viewObjName, abortCount=1000, waitInterval=500, canSimulateHumanBehavior=false) {
+findClick(viewObjName, abortCount=1000, waitInterval=200, canSimulateHumanBehavior=false) {
 	global asaGameHwnd
 	global ClickPosIndicator
 	global stdWaitTime
@@ -184,7 +184,7 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 			return false
 		}
 		
-		handleGeneralError()  ; dealing with errors
+		; handleGeneralError()  ; dealing with errors
 		
 		if(hasEarlyResult()) {
 			return
@@ -232,7 +232,7 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 }
 
 ; if numTryAllowed is 0, then allow unlimited try
-notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTryAllowed=5) {
+notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=100, numTryAllowed=2) {
 	global asaGameHwnd
 	global canRun
 
@@ -250,7 +250,7 @@ notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, num
 			return
 		}
 		
-		handleGeneralError()  ; dealing with errors
+		; handleGeneralError()  ; dealing with errors
 		
 		if(hasEarlyResult()) {
 			return
@@ -299,18 +299,139 @@ notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, num
 }
 
 
+existFuzzImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTryAllowed=5, variation=50) {
+	global asaGameHwnd
+	global canRun
+
+	global yBorder
+	
+	iters = 0
+	
+	imgPath := A_ScriptDir "\data\img\" imgPath
+	
+	while(true) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return false
+		}
+		
+		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+		pBitmapNeedle := Gdip_CreateBitmapFromFile(imgPath)
+		
+		if (L_x1 >= 0 && L_y1 >= 0 && L_x2 >= 0 && L_y2 >= 0) {
+			;~ MsgBox, search region data!
+			sX1 := L_x1
+			sY1 := L_y1 + yBorder
+			sX2 := L_x2
+			sY2 := L_y2 + yBorder
+			
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,sX1,sY1,sX2,sY2,variation,0,1,1)
+		} else {  ; search region data is invalid or is not provided -> search full window
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,variation,0,1,1)
+		}
+
+		; try freeing vars
+		Gdip_DisposeImage(pBitmapHayStack)
+		Gdip_DisposeImage(pBitmapNeedle)
+		
+		pBitmapHayStack := ""
+		pBitmapNeedle := ""
+		
+		if (result = 1) {  ; image found
+			;~ MsgBox, img found!
+			return true
+		}
+		
+		if(numTryAllowed > 0 && iters > numTryAllowed) {
+			;~ MsgBox, out of allowance
+			return false ; try allowance reached
+		} ; else if numTryAllowed < 0 or = 0, then do nothing and let the loop run unlimitedly until image is found
+		
+		iters++
+		
+		Sleep waitInterval
+		; IMPORTANT: if unable to find target images after multiple iteration, maybe the draw need to be updated
+		; drag the screen a little bit, or go back to previous page to let the screen to be redraw
+		
+	}
+}
+
+
+existBitImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=50, numTryAllowed=2, variation=10) {
+	global asaGameHwnd
+	global canRun
+
+	global yBorder
+	
+	iters = 0
+	
+	imgPath := A_ScriptDir "\data\img\" imgPath
+	
+	while(true) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return false
+		}
+		
+		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+		pBitmapNeedle := Gdip_CreateBitmapFromFile(imgPath)
+		
+		if (L_x1 >= 0 && L_y1 >= 0 && L_x2 >= 0 && L_y2 >= 0) {
+			;~ MsgBox, search region data!
+			sX1 := L_x1
+			sY1 := L_y1 + yBorder
+			sX2 := L_x2
+			sY2 := L_y2 + yBorder
+			
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,sX1,sY1,sX2,sY2,variation,0,1,1)
+		} else {  ; search region data is invalid or is not provided -> search full window
+			result := Gdip_ImageSearch(pBitmapHayStack,pBitmapNeedle,OutputList,,,,,variation,0,1,1)
+		}
+
+		; try freeing vars
+		Gdip_DisposeImage(pBitmapHayStack)
+		Gdip_DisposeImage(pBitmapNeedle)
+		
+		pBitmapHayStack := ""
+		pBitmapNeedle := ""
+		
+		if (result = 1) {  ; image found
+			;~ MsgBox, img found!
+			return true
+		}
+		
+		if(numTryAllowed > 0 && iters > numTryAllowed) {
+			;~ MsgBox, out of allowance
+			return false ; try allowance reached
+		} ; else if numTryAllowed < 0 or = 0, then do nothing and let the loop run unlimitedly until image is found
+		
+		iters++
+		
+		Sleep waitInterval
+		; IMPORTANT: if unable to find target images after multiple iteration, maybe the draw need to be updated
+		; drag the screen a little bit, or go back to previous page to let the screen to be redraw
+		
+	}
+}
+
+
+
 hasEarlyResult() {  ; if battle is ended earlier than expected
 	; check win in every loop
 	; if result image is found then switch early termination
 	global asaGameHwnd
 	global canRun
+	global yBorder
+	global earlyResult
 	
 	if(!canRun) {
 		;~ MsgBox, cancelling
 		return
 	}
 	
-	global yBorder
+	if(earlyResult) { ;~ if confirmed, return immediately
+		return true
+	}
 	
 	retryCount = 0
 	
@@ -334,6 +455,7 @@ hasEarlyResult() {  ; if battle is ended earlier than expected
 	Gdip_DisposeImage(pBitmapHayStack)
 	
 	if (result = 1) {  ; image found
+		earlyResult := true
 		return true
 	} else {
 		return false
@@ -600,8 +722,8 @@ checkForError() {
 	; try freeing vars
 	Gdip_DisposeImage(pBitmapNeedle_connectionError)
 	
-	if (result_connectionError = 1) {  ; image found
 		resCoord := StrSplit(OutputList, ",")
+	if (result_connectionError = 1) {  ; image found
 		x := resCoord[1]
 		y := resCoord[2]
 		
@@ -773,6 +895,22 @@ checkLoginOnBadAuth() {
 }
 
 
+disableAutoBattle() {  ;~ this function only needs to be called on the first run
+	
+	global yBorder
+	
+	;~ search image to check if auto battle option is checked
+	;~ if so, uncheck it
+	changeStatusText("Ensuring Auto Battle option is unchecked...")
+	autoBattle := existImage("Option_AutoBattle.png", 1129, 615, 1250, 699, 200, 5)
+	if (autoBattle) {
+		;~ click to uncheck the option
+		ExecClick("Unchecking Auto Battle", 1193, 641 + yBorder, 0, false)
+		
+		Sleep 500
+	}
+}
+
 
 
 quickTapAnywhere(numClick=20) {
@@ -783,6 +921,8 @@ quickTapAnywhere(numClick=20) {
 	global ClickPosIndicator  ; next click position
 	global WinSize            ; status bar
 	global allData            ; click data
+	
+	global canRun
 	
 	global yBorder ; constant border px
 	
@@ -797,6 +937,11 @@ quickTapAnywhere(numClick=20) {
 	
 	k := 0
 	while(k < numClick) {
+		
+		if(!canRun) {
+			break
+		}
+	
 		; random offsets from base point for each click
 		
 		; gerating a random point within a circle uniformly
@@ -913,7 +1058,7 @@ ExecClick(actName, pX, pY, delay, canSimulateHumanBehavior) {
 	global asaGameHwnd
 	global clickNoDelay
 	
-	if (!clickNoDelay) {
+	if (clickNoDelay) {
 		GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%
 	} else {
 		GuiControl,, ClickPosIndicator, Action: %actName%`nX: %pX% / Y: %pY%`nDelay: %delay%s

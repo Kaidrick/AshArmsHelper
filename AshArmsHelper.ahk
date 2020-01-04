@@ -4,10 +4,14 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 CoordMode, Pixel, Window
+FileEncoding, UTF-8
 
 #Include MapLib.ahk
 #Include JSON.ahk
 #Include FlowExec.ahk
+#Include UnitOptionCheck.ahk
+
+#Include DropStats.ahk  ;~ testing only, remove after testing
 
 ; To-do list
 ; 1. deals with invalid auth after long idle time (partially implemented)
@@ -39,6 +43,8 @@ winResolutionWidth := 1280
 winResolutionHeight := 720
 
 ; Script states
+startTime := A_Now
+
 canRun := false
 canRestart := false
 isRepeatTask := false
@@ -47,10 +53,15 @@ useCoordDataOnly := false
 skipSleep := false
 alwaysSkipSleep := false ;~ to-do
 
+earlyResult := false
+
 ; User options
 longSessionBreak := false
 runNonStop := false
+logDrops := false
 clickNoDelay := false
+
+logFilePath := A_ScriptDir "\logs\"
 
 
 Gui, Add, Text, x5 y5 h14 w135 vWorkStatusIndicator, %workStatus%
@@ -58,7 +69,7 @@ Gui, Add, Text, x5 y25 h14 w350 vWinSize, %winSize%
 Gui, Add, Text, x5 y45 h48 w450 vClickPosIndicator, %clickPos%
 Gui, Add, Text, x220 y5 h14 w100 vRunNum, %statsRun%
 
-Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"
+Gui, Show, w292 h378, % "ｱｯｼｭｱｰﾑｽﾞ周回ﾍﾙﾊﾟｰ"aua
 
 Gui, Add, Button, x5 y130 h50 w50 vMasterButton gMasterRoutine, % "Start"
 Gui, Add, Button, x55 y130 h50 w50 vStopButton gBigSwitchOff, % "Stop"
@@ -78,14 +89,16 @@ Gui, Add, Text, x5 y90 h10 w450 vBr1, % "—————————————
 
 Gui, Add, DropDownList, x5 y105 vStageChoiceNew gOnStageSelectNew w280 h50 Choose1 R10, %files%
 
-Gui, Add, CheckBox, x115 y130 h16 w150 vCB_Nonstop gNonStop, % "Non-stop Mode"
+Gui, Add, CheckBox, x110 y130 h16 w95 vCB_Nonstop gNonStop, % "Non-stop Mode"
 
-Gui, Add, CheckBox, x115 y147 h16 w150 vCB_NoDelay gNoDelay, % "Click No Delay"
+Gui, Add, CheckBox, x210 y130 h16 w95 vCB_LogDrops gLogDrops, % "Log Drops"
+
+Gui, Add, CheckBox, x110 y147 h16 w95 vCB_NoDelay gNoDelay, % "Click No Delay"
 
 ;~ Gui, Add, CheckBox, x115 y130 h26 w150 vCB_ForceClick gForceClick, % "[WIP] Silent Mode (Coord and Time only)"
 ;~ GuiControl, Disable, CB_ForceClick
 
-Gui, Add, Checkbox, x115 y164 h16 w200 gLongSession, % "Sleep Session (Allow long break)"
+Gui, Add, Checkbox, x110 y164 h16 w200 gLongSession, % "Sleep Session"
 
 Gui, Add, Button, x150 y5 h15 w30 vWakeButton gWakeUpNow, % "▶▶"
 GuiControl, Hide, WakeButton
@@ -201,8 +214,32 @@ return
 TapTap:
 canRun := true
 
-notExistImage("preStage_Consumption.png")
-MsgBox, loading
+;~ collectDollDropData()
+;~ check drops
+;~ dollDrop := collectDollDropData()
+;~ matsDrop := collectMatsDropData()
+;~ strDrop := dollDrop "," matsDrop "`n"
+
+theaterSel := "Test"
+mapNodeSel := "-Test"
+mapDifficulty := "N"
+
+;~ check drops
+dollDrop := collectDollDropData()
+matsDrop := collectMatsDropData()
+logNum := runCount + 1
+strDrop := logNum "," dollDrop "," matsDrop "`n"
+
+logFileName := theaterSel mapNodeSel " " mapDifficulty ".csv"
+file := FileOpen(logFileName,"a")
+file.write(strDrop)
+file.close()
+
+;~ logFileName := theaterSel mapNodeSel " " mapDifficulty ".csv"
+;~ file := FileOpen(logFileName,"a")
+;~ file.write(strDrop)
+;~ file.close()
+
 ;~ simulateRandomBehavior()
 
 ;~ checkLoginOnBadAuth()
@@ -240,6 +277,7 @@ GuiControl,, RunNum, % "Round: " runCount
 ; run the process
 BigSwitchOn()
 while(true) {
+	
 	gosub CheckWorkStatus
 	
 	;~ MsgBox % canRun
@@ -288,6 +326,7 @@ if(canRun) {
 	path := A_ScriptDir "\data\flow\" selStageName ".txt"
 	
 	FileReadLine, stageInfo, %path%, 1
+	FileReadLine, descInfo, %path%, 2
 	stageInfo := StrSplit(stageInfo, ",")
 	theaterSel := stageInfo[2]
 	mapNodeSel := stageInfo[3]
@@ -310,11 +349,25 @@ if(canRun) {
 		Sleep 2000
 		findClick("orderReady")
 		Sleep 2000
+		
+		earlyResult := false
+		disableAutoBattle()
+		matchOptions(descInfo)  ;~ check for unit role option mismatch
+		
+		Sleep 500
+		
 		findClick("affirmReady")
+		
+		earlyResult := false
 		
 		;~ check if affirm ready still exists, if so keep clicking
 		stuck := existImage("preStage_Consumption.png")
 		while(stuck) {
+			if(!canRun) {
+				;~ MsgBox, cancelling
+				break
+			}
+		
 			changeStatusText("Ensuring Stage Loading")
 		
 			handleGeneralError()  ; dealing with errors
@@ -325,29 +378,80 @@ if(canRun) {
 			findClick("affirmReady", 1)  ;~ abort if not found for once
 		}
 		
+		;~ button is pressed for sure, but network errors may occur
 		;~ wait until battle button shows up
 		changeStatusText("Loading...")
-		existImage("battleView_BattleStart.png",,,,,,0)  ; must see
+		;~ if start button is not seen then keep handling errors here
+		
+		loaded := existImage("battleView_BattleStart.png")
+		while(!loaded) {
+			if(!canRun) {
+				;~ MsgBox, cancelling
+				break
+			}
+		
+			handleGeneralError()  ; dealing with errors
+			checkLoginOnBadAuth()  ; dealing with login problems
+			
+			loaded := existImage("battleView_BattleStart.png")
+		}
 		
 		executeFlow(path)
+		
+		if(!logDrops) {
+			findClick("resultBattleStats",,,true)
+		} else {
+			;~ wait until resultBattleStats is found
+			existImage("resultBattleStats.png",,,,,,0)  ; must see
+		
+			;~ click three times to go to item drops
+			quickTapAnywhere(3)
+			
+			existImage("Result_Loot.png",,,,,,0)  ;~ check for got item title
+			changeStatusText("Ready to analyze drops")
+			Sleep 2000
+			;~ check drops
+			dollDrop := collectDollDropData()
+			matsDrop := collectMatsDropData()
+			
+			logNum := runCount + 1
+			strDrop := logNum "," dollDrop "," matsDrop "`n"
 
-		findClick("resultBattleStats",,,true)
+			logFileName := theaterSel mapNodeSel " " mapDifficulty " " startTime ".csv"
+			file := FileOpen(logFilePath logFileName,"a")
+			file.write(strDrop)
+			file.close()
+			
+			;~ click until repeat button shows up
+			quickTapAnywhere(10)
+		}
+		
 		
 		workDone := true
-		
 		isRepeatTask := true
 		
 		runCount++
 		GuiControl,, RunNum, % "Round: " runCount
 	} else {
 		;~ start from result page
-		findClick("repeatStageFromBattleResult")
-		Sleep 3000
+		findClick("repeatStageFromBattleResult")  
+		
+		;~ check errors here? --> no need; no connection here only loading
+
+		;~ Sleep 3000
 		findClick("affirmReady")
+		
+		earlyResult := false
 		
 		;~ check if affirm ready still exists, if so keep clicking
 		stuck := existImage("preStage_Consumption.png")
+		
 		while(stuck) {
+			if(!canRun) {
+				;~ MsgBox, cancelling
+				break
+			}
+		
 			changeStatusText("Ensuring Stage Loading")
 		
 			handleGeneralError()  ; dealing with errors
@@ -358,14 +462,54 @@ if(canRun) {
 			findClick("affirmReady", 1)  ;~ abort if not found for once
 		}
 		
+		;~ button is pressed for sure, but network errors may occur
 		;~ wait until battle button shows up
 		changeStatusText("Loading...")
-		existImage("battleView_BattleStart.png",,,,,,0)  ; must see
-
+		;~ if start button is not seen then keep handling errors here
+		
+		loaded := existImage("battleView_BattleStart.png")
+		while(!loaded) {
+			if(!canRun) {
+				;~ MsgBox, cancelling
+				break
+			}
+		
+			handleGeneralError()  ; dealing with errors
+			checkLoginOnBadAuth()  ; dealing with login problems
+			
+			loaded := existImage("battleView_BattleStart.png")
+		}
+		
 		;~ execute battle flow if no error
 		executeFlow(path)
+		
+		if(!logDrops) {
+			findClick("resultBattleStats",,,true)
+		} else {
+			;~ wait until resultBattleStats is found
+			existImage("resultBattleStats.png",,,,,,0)  ; must see
+		
+			;~ click three times to go to item drops
+			quickTapAnywhere(3)
+			
+			existImage("Result_Loot.png",,,,,,0)  ;~ check for got item title
+			changeStatusText("Ready to analyze drops")
+			Sleep 2000
+			;~ check drops
+			dollDrop := collectDollDropData()
+			matsDrop := collectMatsDropData()
 
-		findClick("resultBattleStats",,,true)
+			logNum := runCount + 1
+			strDrop := logNum "," dollDrop "," matsDrop "`n"
+
+			logFileName := theaterSel mapNodeSel " " mapDifficulty " " startTime ".csv"
+			file := FileOpen(logFilePath logFileName,"a")
+			file.write(strDrop)
+			file.close()
+			
+			;~ click until repeat button shows up
+			quickTapAnywhere(10)
+		}
 		
 		workDone := true
 		isRepeatTask := true
@@ -406,6 +550,8 @@ BigSwitchOn() {
 	GuiControl, Disable, MasterButton
 	GuiControl, Enable, StopButton
 	GuiControl, Disable, StageChoiceNew
+	
+	startTime := A_Now
 
 	return
 }
@@ -415,9 +561,11 @@ BigSwitchOff() {
 	global isRepeatTask
 	global StopButton
 	global StageChoice
+	global earlyResult
 	
 	canRun := false
 	isRepeatTask := false
+	earlyResult := false
 	GuiControl, Disable, StopButton
 	GuiControl, Enable, StageChoiceNew
 	GuiControl, Hide, WakeButton
@@ -442,6 +590,14 @@ if (runNonStop = true) {
 }
 return
 
+LogDrops:
+if (logDrops = true) {
+	logDrops := false
+} else {
+	logDrops := true
+}
+return
+
 NoDelay:
 if (clickNoDelay = true) {
 	clickNoDelay := false
@@ -462,6 +618,9 @@ return
 
 GrindStart:
 findClick("returnHomeButton", 5)
+
+;~ network errors may occur here
+
 Sleep 2000  ; wait for main page
 
 ; todo

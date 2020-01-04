@@ -1,0 +1,42 @@
+﻿{
+	"INTC": "UnitOption_Intercept.png",
+	"ASUP": "UnitOption_AirSuperiority.png",
+	"ACOM": "UnitOption_AirCombat.png",
+	"RECC": "UnitOption_Recon.png",
+	"GATK": "UnitOption_GroundAttack.png",
+	
+	"I": "UnitOption_Intercept.png",
+	"S": "UnitOption_AirSuperiority.png",
+	"C": "UnitOption_AirCombat.png",
+	"R": "UnitOption_Recon.png",
+	"G": "UnitOption_GroundAttack.png",
+	
+	
+	
+	"FRSP": "UnitOption_FireSupport.png",
+	"LRNG": "UnitOption_LongRange.png",
+	"SNIP": "UnitOption_Sniper.png",
+	
+	"F": "UnitOption_FireSupport.png",
+	"L": "UnitOption_LongRange.png",
+	"P": "UnitOption_Sniper.png",
+	
+	
+	
+	"ASLT": "UnitOption_Assault.png",
+	"FRLN": "UnitOption_Frontline.png",
+	"RNGR": "UnitOption_Ranger.png",
+	
+	"A": "UnitOption_Assault.png",
+	"B": "UnitOption_Frontline.png",
+	"V": "UnitOption_Ranger.png",
+	
+	
+	
+	"STRG": "UnitOption_Strategic.png",
+	"TACT": "UnitOption_Tactical.png",
+	
+	"W": "UnitOption_Strategic.png",
+	"T": "UnitOption_Tactical.png"
+}
+
