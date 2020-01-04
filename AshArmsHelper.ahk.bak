@@ -10,8 +10,7 @@ FileEncoding, UTF-8
 #Include JSON.ahk
 #Include FlowExec.ahk
 #Include UnitOptionCheck.ahk
-
-#Include DropStats.ahk  ;~ testing only, remove after testing
+#Include DropStats.ahk
 
 ; To-do list
 ; 1. deals with invalid auth after long idle time (partially implemented)
@@ -417,8 +416,8 @@ if(canRun) {
 			logNum := runCount + 1
 			strDrop := logNum "," dollDrop "," matsDrop "`n"
 
-			logFileName := logFilePath theaterSel mapNodeSel " " mapDifficulty " " startTime ".csv"
-			file := FileOpen(logFileName,"a")
+			logFileName := theaterSel mapNodeSel " " mapDifficulty " " startTime ".csv"
+			file := FileOpen(logFilePath logFileName,"a")
 			file.write(strDrop)
 			file.close()
 			
@@ -502,8 +501,8 @@ if(canRun) {
 			logNum := runCount + 1
 			strDrop := logNum "," dollDrop "," matsDrop "`n"
 
-			logFileName := logFilePath theaterSel mapNodeSel " " mapDifficulty " " startTime ".csv"
-			file := FileOpen(logFileName,"a")
+			logFileName := theaterSel mapNodeSel " " mapDifficulty " " startTime ".csv"
+			file := FileOpen(logFilePath logFileName,"a")
 			file.write(strDrop)
 			file.close()
 			

@@ -1,7 +1,7 @@
 # 灰咕咕自动周回脚本
 你究竟能从无尽的周回肝碎片中脱身吗？
 
-![User Interface](helper_view.png)
+![User Interface](docs/helper_view.png)
 
 然而，这个脚本真正的目的只是为了简单说明为什么在手机游戏App中加入“脚本检测”是无用功，如果运营真的想查处脚本，应当从服务器端的数据着手分析，办法多得是。
 但这个脚本也试图绕过这些“潜在的”检测方案。比如，脚本每次点击都会使用随机坐标，以随机间隔操作，并且每个循环结束后都会随机等待随机的时间。
@@ -13,7 +13,7 @@
 1. 如果你觉得AUTO周回的战损无法接受，为什么不自己动手，只需十几行文字就能针对你自己的BOX，定义无损战斗流程
 2. 自动处理网络链接错误/验证错误/bug导致的其他错误，并按需尝试重新登陆并恢复脚本运行
 
-![User Interface](emulator_test_pic_1.gif)
+![User Interface](docs/emulator_test_pic_1.gif)
 
 **注意，模拟器必须设置为720P（分辨率1280 \* 720）才能正常使用脚本，因为脚本大量使用了图像搜索功能，而用于搜索的图像源的尺寸不能随着窗口尺寸而改变，至少现在不能**
 
@@ -23,7 +23,7 @@
 # 如何使用
 在`emulator window title.ini`文件中填写模拟器窗口的标题，保存为UTF-8-BOM编码
 点击并拖动`AshArmsHelper.ahk`文件至AutoHotkeyU64.exe图标上以运行
-![Open AHK](emulator_test_pic_2.gif)
+![Open AHK](docs/emulator_test_pic_2.gif)
 
 
 # 定义“战斗流程”

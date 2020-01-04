@@ -3,10 +3,8 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
-#Include MapLib.ahk
-#Include JSON.ahk
-#Include MapLib.ahk
-
+#Include Lib\MapLib.ahk
+#Include Lib\JSON.ahk
 
 matchOptions(descInfo) {
 	FileRead, optionJson, UnitOptionData.json

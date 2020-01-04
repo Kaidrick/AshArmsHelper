@@ -3,7 +3,7 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
-#Include MapLib.ahk
+#Include Lib\MapLib.ahk
 
 dollImgPath := A_ScriptDir "\data\img\doll_intel\*.bmp"
 matsImgPath := A_ScriptDir "\data\img\items\*.bmp"

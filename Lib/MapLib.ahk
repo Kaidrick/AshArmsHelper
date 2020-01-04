@@ -4,11 +4,12 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 ; import Gdip libs for image search
-#Include Gdip_All.ahk
-#Include Gdip_ImageSearch.ahk
-#Include HumanBehaviors.ahk
+#Include Lib\Gdip_All.ahk
+#Include Lib\Gdip_ImageSearch.ahk
+#Include Lib\HumanBehaviors.ahk
+#Include Lib\FlowExec.ahk
+
 #Include AshArmsHelper.ahk
-#Include FlowExec.ahk
 
 ; Functions
 p := Gdip_Startup()

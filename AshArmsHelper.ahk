@@ -6,12 +6,11 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 CoordMode, Pixel, Window
 FileEncoding, UTF-8
 
-#Include MapLib.ahk
-#Include JSON.ahk
-#Include FlowExec.ahk
-#Include UnitOptionCheck.ahk
-
-#Include DropStats.ahk  ;~ testing only, remove after testing
+#Include Lib\MapLib.ahk
+#Include Lib\JSON.ahk
+#Include Lib\FlowExec.ahk
+#Include Lib\UnitOptionCheck.ahk
+#Include Lib\DropStats.ahk
 
 ; To-do list
 ; 1. deals with invalid auth after long idle time (partially implemented)
