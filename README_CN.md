@@ -23,7 +23,18 @@
 
 
 # 如何使用
-在`emulator window title.ini`文件中填写模拟器窗口的标题，保存为UTF-8-BOM编码
+
+
+从此处下载已编译的AHK可执行文件 https://github.com/Kaidrick/AshArmsHelper/releases 。
+
+在`emulator window title.ini`文件中填写模拟器窗口的标题，保存为UTF-8-BOM编码。
+
+双击AshArmsHelper.exe来运行脚本。
+
+
+或者
+
+
 点击并拖动`AshArmsHelper.ahk`文件至AutoHotkeyU64.exe图标上以运行
 ![Open AHK](docs/emulator_test_pic_2.gif)
 
