@@ -128,6 +128,8 @@ No need to explain that.
 If you write your DESC entry correctly in the flow files, the script will try to check if the unit on each position is using the proper option.
 Option is the role of a unit. It could be Ground Attack or Air Superiority or Long Range Fire Support, etc.
 
+![User Interface](docs/emulator_test_pic_3.gif)
+
 For example:
 `DESC,F4F/INTC,,,,ホイシュレッケ/LRNG,,,,ホイシュレッケ,グリレH型,IV号対空戦車ヴィルベルヴィント,M10ウルヴァリン,88mmFlaK36アハトアハト`
 "/" tell the script to check for role options. INTC means Intercept. So the script will check if F4F's option is set correctly before hitting the READY button.
@@ -158,5 +160,8 @@ Other Options are WIP
 
 
 # Loot Recorder
+
+![User Interface](docs/emulator_test_pic_4.gif)
+
 This is a highly WIP function. Accuracy is not guaranteed in any means. It also needs a tons of images to be able to do image searches on each type of materials and doll intell fragments.
 The result for each battle is saved to an \*.csv file for later analysis.
