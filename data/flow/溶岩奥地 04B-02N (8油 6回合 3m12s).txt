@@ -1,5 +1,5 @@
 ﻿INFO,04B,02,N
-DESC,F4F[Intercept],,,,ホイシュレッケ,M3 Stuart,,,テトラーク
+DESC,F4F/ACOM,,,,ホイシュレッケ/LRNG,M3 Stuart/FRLN,,,テトラーク
 SELECT,1,
 SWITCH,,
 SKILL,3,

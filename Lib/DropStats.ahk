@@ -14,7 +14,7 @@ matsRelativePath := "\items\"
 
 collectDollDropData() {
 	global resx
-	
+	global canRun
 	global dollImgPath
 	global dollRelativePath
 	
@@ -47,7 +47,7 @@ collectDollDropData() {
 
 collectMatsDropData() {
 	global resx
-	
+	global canRun
 	global matsImgPath
 	global matsRelativePath
 	

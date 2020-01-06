@@ -223,31 +223,26 @@ return
 TapTap:
 canRun := true
 
-;~ collectDollDropData()
-;~ check drops
-;~ dollDrop := collectDollDropData()
-;~ matsDrop := collectMatsDropData()
-;~ strDrop := dollDrop "," matsDrop "`n"
+;~ pixelColorMatch(971.2, 523.2, 429213272)
+;~ areaColorMatch(497.6, 523.2, 4293302272)
+waitSelection()
+	;~ 255.8 523.2
+	;~ 497.6 523.2
+	;~ 735.4 523.2
+	;~ 974.2 523.2
 
-theaterSel := "Test"
-mapNodeSel := "-Test"
-mapDifficulty := "N"
+; Normal 4280382317
+; Green 4280250988
 
-;~ check drops
-dollDrop := collectDollDropData()
-matsDrop := collectMatsDropData()
-logNum := runCount + 1
-strDrop := logNum "," dollDrop "," matsDrop "`n"
+; 173.8, 586.2
+; 345.7 586.2
 
-logFileName := theaterSel mapNodeSel " " mapDifficulty ".csv"
-file := FileOpen(logFileName,"a")
-file.write(strDrop)
-file.close()
+;~ waitSelection()
+;4281135593
+; 4293302272
 
-;~ logFileName := theaterSel mapNodeSel " " mapDifficulty ".csv"
-;~ file := FileOpen(logFileName,"a")
-;~ file.write(strDrop)
-;~ file.close()
+
+
 
 ;~ simulateRandomBehavior()
 
@@ -355,15 +350,15 @@ if(canRun) {
 		Sleep rWait * 1000
 		
 		findClick(mapNodeKeyName)
-		Sleep 2000
+		Sleep 1000
 		findClick("orderReady")
-		Sleep 2000
+		
+		;~ wait until ui loaded
+		existImage("preStage_Consumption.png",,,,,,0)
 		
 		earlyResult := false
 		disableAutoBattle()
 		matchOptions(descInfo)  ;~ check for unit role option mismatch
-		
-		Sleep 500
 		
 		findClick("affirmReady")
 		
@@ -408,7 +403,19 @@ if(canRun) {
 		executeFlow(path)
 		
 		if(!logDrops) {
-			findClick("resultBattleStats",,,true)
+			;~ findClick("resultBattleStats",,,true)
+			
+			; if repeat button is not visible then keep clicking
+			repeatButton := existImage("postStage_Repeat.png", 420, 610, 631, 700, 50, 1)
+			while(!repeatButton) {
+				if(!canRun) {
+					;~ MsgBox, cancelling
+					break
+				}
+				repeatButton := existImage("postStage_Repeat.png", 420, 610, 631, 700, 50, 1)
+				quickTapAnywhere(1)
+			}
+			
 		} else {
 			;~ wait until resultBattleStats is found
 			existImage("resultBattleStats.png",,,,,,0)  ; must see
@@ -493,7 +500,17 @@ if(canRun) {
 		executeFlow(path)
 		
 		if(!logDrops) {
-			findClick("resultBattleStats",,,true)
+			;~ findClick("resultBattleStats",,,true)
+			
+			repeatButton := existImage("postStage_Repeat.png", 420, 610, 631, 700, 50, 1)
+			while(!repeatButton) {
+				if(!canRun) {
+					;~ MsgBox, cancelling
+					break
+				}
+				repeatButton := existImage("postStage_Repeat.png", 420, 610, 631, 700, 50, 1)
+				quickTapAnywhere(1)
+			}
 		} else {
 			;~ wait until resultBattleStats is found
 			existImage("resultBattleStats.png",,,,,,0)  ; must see

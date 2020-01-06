@@ -10,6 +10,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;
 earlyTermination = false
 
+selectFocus := false
+
 ; This file contains a few function to execute pre-defined battle flow provided in json files
 executeFlow(flowName) {
 	global resx
@@ -93,6 +95,10 @@ perform(action, args="", desc="") {
 	global clickNoDelay
 	global stdWaitTime
 	
+	if(hasEarlyResult()) {
+		return
+	}
+	
 	GuiControl,, ClickPosIndicator, % resx["pos_FlowCmd"] action ", " args "`n" resx["pos_FlowOps"] desc
 	
 	checkForError()
@@ -153,13 +159,10 @@ battleView_Wait(args) {
 
 battleView_Select(index=1) {
 	global canRun
-	
-	if(hasEarlyResult()) {
-		return
-	}
+	global selectFocus
 	
 	;~ while battle start button is not seen, check for errors
-	hasTurn := existImage("battleView_BattleStart.png")
+	hasTurn := existImage("battleView_BattleStart.png",1114,542,1191,622,,true)
 	while(!hasTurn) {
 		if(!canRun) {
 			;~ MsgBox, cancelling
@@ -173,14 +176,11 @@ battleView_Select(index=1) {
 		handleGeneralError()  ; dealing with errors
 		checkLoginOnBadAuth()  ; dealing with login problems
 		
-		hasTurn := existImage("battleView_BattleStart.png")
+		hasTurn := existImage("battleView_BattleStart.png",1114,542,1191,622,,true)
 	}
 	
 	;~ GuiControl,, WinSize, % "Coord Click Mode"
-	existImage("battleView_BattleStart.png",,,,,,0)  ; must see
-	if(hasEarlyResult()) {
-		return
-	}
+	existImage("battleView_BattleStart.png",1114,542,1191,622,0,0,true)  ; must see
 		
 	switch index {
 		case 1: coordClick(113, 638)
@@ -193,14 +193,12 @@ battleView_Select(index=1) {
 }
 
 battleView_Deselect(index) {
-	if(hasEarlyResult()) {
-		return
-	}
+	global selectFocus
 	
-	notExistImage("battleView_BattleStart.png")
-	if(hasEarlyResult()) {
-			return
-		}
+	Sleep 100
+	
+	notExistImage("battleView_BattleStart.png",1114,542,1191,622,20,1)
+	; existImage("battleView_ClearAssignment.png",171,477,1027,565,10,0)  ; must see clear button
 		
 	switch index {
 		case 1: coordClick(113, 638)
@@ -211,18 +209,24 @@ battleView_Deselect(index) {
 		case 6: coordClick(981, 638)
 		Default: coordClick(113, 638)
 	}
+	
+	selectFocus := false
 	; Sleep 500
 }
 
 battleView_Move(index) {
-	if(hasEarlyResult()) {
-		return
-	}
+	global selectFocus
 	
-	notExistImage("battleView_BattleStart.png")
-	if(hasEarlyResult()) {
-			return
-		}
+	waitSelection()
+	
+	;~ if(!selectFocus) {  ;~ if no select focus
+		;~ pixelColorMatch(76, 481.2, 4281135593) ; the color of the switch stance button upper left cornor rotate thingy
+		;~ ; existImage("battleView_StanceSwitchIcon.png",61,472,91,502,0,0)  ; wait for and confirm focus
+		;~ selectFocus := true  ; confirm select focus
+	;~ }
+	
+	; existImage("battleView_ClearAssignment.png",171,477,1027,565,10,0)  ; must see clear button
+
 	switch index {
 		case 1: coordClick(183, 411)
 		case 2: coordClick(313, 411)
@@ -237,27 +241,32 @@ battleView_Move(index) {
 }
 
 battleView_Switch() {
-	if(hasEarlyResult()) {
-		return
-	}
+	global selectFocus
+	
+	waitSelection()
 	
 	; find and click the image?
-	notExistImage("battleView_BattleStart.png")
-	if(hasEarlyResult()) {
-			return
-		}
+	; notExistImage("battleView_BattleStart.png",1114,542,1191,622,20,1)
+	;~ if(!selectFocus) {  ;~ if no select focus
+		;~ pixelColorMatch(76, 481.2, 4281135593) ; the color of the switch stance button upper left cornor rotate thingy
+		;~ ; existImage("battleView_StanceSwitchIcon.png",61,472,91,502,0,0)  ; wait for and confirm focus
+		;~ selectFocus := true  ; confirm select focus
+	;~ }
+	
 	coordClick(124, 508)
 }
 
 battleView_Skill(index) {
-	if(hasEarlyResult()) {
-		return
-	}
+	global selectFocus
 	
-	notExistImage("battleView_BattleStart.png")
-	if(hasEarlyResult()) {
-			return
-		}
+	waitSelection()
+	
+	;~ if(!selectFocus) {  ;~ if no select focus
+		;~ pixelColorMatch(76, 481.2, 4281135593) ; the color of the switch stance button upper left cornor rotate thingy
+		;~ ; existImage("battleView_StanceSwitchIcon.png",61,472,91,502,0,0)  ; wait for and confirm focus
+		;~ selectFocus := true  ; confirm select focus
+	;~ }
+	
 	switch index {
 		case 1: coordClick(336, 518)
 		case 2: coordClick(575, 518)
@@ -266,41 +275,27 @@ battleView_Skill(index) {
 }
 
 battleView_StartTurn() {
-	if(hasEarlyResult()) {
-		return
-	}
 	
 	; check clear button is gone and then click start turn
-	notExistImage("battleView_ClearAssignment.png")
-	if(hasEarlyResult()) {
-			return
-		}
+	; notExistImage("battleView_ClearAssignment.png")
+	existImage("battleView_BattleStart.png",1114,542,1191,622,10,0)  ; must see
+
 	coordClick(1162, 609)
 }
 
 battleView_Confirm() {
-	if(hasEarlyResult()) {
-		return
-	}
 	
 	existImage("battleView_ConfirmTurn.png",,,,,,0)  ; must see
-	if(hasEarlyResult()) {
-			return
-		}
+
 	coordClick(1052, 343)
 }
 
 battleView_SkipTurn() {
-	if(hasEarlyResult()) {
-		return
-	}
 	
 	;~ skill this turn without doing anything
 	;~ if start turn image exists, click on it
 	existImage("battleView_BattleStart.png",,,,,,0)
-	if(hasEarlyResult()) {
-			return
-		}
+
 	coordClick(1162, 609)
 }
 
@@ -338,13 +333,49 @@ battleView_Auto() {
 		return
 	}
 	
-	existImage("battleViewWithdraw.png",,,,,,0)  ; must see
+	existImage("battleViewWithdraw.png",1114,542,1191,622,,0)  ; must see
 	if(hasEarlyResult()) {
 		return
 	}
 	coordClick(1052, 343)
 }
 
+
+
+waitSelection() {
+	global selectFocus
+	
+	if(selectFocus) {  ;~ if can confirm selectFocus, return immediately
+		return
+	}
+	
+	while(true) {
+		if(areaColorMatch(974.2, 523.2, 4293302272)) {  ;~ 3 skill sets
+			break
+		}
+		
+		if(areaColorMatch(735.4, 523.2, 4293302272)) {  ;~ 2 skill sets
+			break
+		}
+		
+		if(areaColorMatch(497.6, 523.2, 4293302272)) {  ;~ 1 skill set
+			break
+		}
+		
+		if(areaColorMatch(255.8, 523.2, 4293302272)) {  ;~ 0 skill set
+			break
+		}
+	;~ 255.8 523.2
+	;~ 497.6 523.2
+	;~ 735.4 523.2
+	;~ 974.2 523.2
+	
+		;~ MsgBox, not selected!
+	}
+	selectFocus := true
+	;~ MsgBox, Selected!
+	return
+}
 
 
 
@@ -354,6 +385,10 @@ coordClick(x, y) {
 	global stdErrorRange
 	global yBorder
 	global clickNoDelay
+	
+	if(hasEarlyResult()) {
+		return
+	}
 	
 	; generate random click position offset
 	xRand := NormalRand(-stdErrorRange, stdErrorRange, 0)

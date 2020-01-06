@@ -8,6 +8,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 matchOptions(descInfo) {
 	global resx
+	global canRun
 	
 	FileRead, optionJson, UnitOptionData.json
 	optionData := JSON.Load(optionJson)

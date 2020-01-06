@@ -171,7 +171,7 @@ findClick(viewObjName, abortCount=1000, waitInterval=200, canSimulateHumanBehavi
 }
 
 
-existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTryAllowed=5) {
+existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTryAllowed=5, isTerminal=false) {
 	global asaGameHwnd
 	global canRun
 
@@ -188,9 +188,10 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 		}
 		
 		; handleGeneralError()  ; dealing with errors
-		
-		if(hasEarlyResult()) {
-			return
+		if(isTerminal) {
+			if(hasEarlyResult()) {
+				return
+			}
 		}
 		
 		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
@@ -220,12 +221,14 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 			return true
 		}
 		
+		iters++
+		
 		if(numTryAllowed > 0 && iters > numTryAllowed) {
 			;~ MsgBox, out of allowance
 			return false ; try allowance reached
 		} ; else if numTryAllowed < 0 or = 0, then do nothing and let the loop run unlimitedly until image is found
 		
-		iters++
+		
 		
 		Sleep waitInterval
 		; IMPORTANT: if unable to find target images after multiple iteration, maybe the draw need to be updated
@@ -235,7 +238,7 @@ existImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, numTry
 }
 
 ; if numTryAllowed is 0, then allow unlimited try
-notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=100, numTryAllowed=2) {
+notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=100, numTryAllowed=2, isTerminal=false) {
 	global asaGameHwnd
 	global canRun
 
@@ -255,8 +258,10 @@ notExistImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=100, num
 		
 		; handleGeneralError()  ; dealing with errors
 		
-		if(hasEarlyResult()) {
-			return
+		if(isTerminal) {
+			if(hasEarlyResult()) {
+				return
+			}
 		}
 		
 		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
@@ -345,6 +350,52 @@ existFuzzImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, nu
 			return true
 		}
 		
+		iters++
+		
+		if(numTryAllowed > 0 && iters > numTryAllowed) {
+			;~ MsgBox, out of allowance
+			return false ; try allowance reached
+		} ; else if numTryAllowed < 0 or = 0, then do nothing and let the loop run unlimitedly until image is found
+		
+		
+		
+		Sleep waitInterval
+		; IMPORTANT: if unable to find target images after multiple iteration, maybe the draw need to be updated
+		; drag the screen a little bit, or go back to previous page to let the screen to be redraw
+		
+	}
+}
+
+
+pixelColorMatch(cX, cY, matchColor, waitInterval=0, numTryAllowed=0) {
+	global asaGameHwnd
+	global canRun
+
+	global yBorder
+	
+	iters = 0
+	
+	while(true) {
+		if(!canRun) {
+			;~ MsgBox, cancelling
+			return false
+		}
+		
+		pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+		pixelColor := Gdip_GetPixel(pBitmapHayStack, cX, cY + yBorder)
+
+		; try freeing vars
+		Gdip_DisposeImage(pBitmapHayStack)
+		pBitmapHayStack := ""
+		
+		if (pixelColor = matchColor) {  ; pixel color match 29E2DA
+			;~ MsgBox, img found!
+			return true
+		} 
+		else {
+			MsgBox % pixelColor
+		}
+		
 		if(numTryAllowed > 0 && iters > numTryAllowed) {
 			;~ MsgBox, out of allowance
 			return false ; try allowance reached
@@ -359,6 +410,46 @@ existFuzzImage(imgPath, L_x1="", L_y1="", L_x2="", L_y2="", waitInterval=200, nu
 	}
 }
 
+areaColorMatch(cX, cY, matchColor, waitInterval=0, numTryAllowed=0) {
+	global asaGameHwnd
+	global canRun
+
+	global yBorder
+	
+	iters = 0
+	
+	; 4293302272
+	
+
+	if(!canRun) {
+		return false
+	}
+	
+	pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+	
+	offsetDist := -3
+	lineMatch := true
+	while(offsetDist < 4) {
+		pixelColor := Gdip_GetPixel(pBitmapHayStack, cX + offsetDist, cY + yBorder)
+		if(pixelColor = matchColor) {
+			; continue
+			;~ MsgBox % "offset: " offsetDist ", color: " pixelColor
+			
+			offsetDist := offsetDist + 1
+		} else {
+			lineMatch := false
+			break
+		}
+	}
+	
+	;~ MsgBox % "line search done: " lineMatch
+	
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapHayStack)
+	pBitmapHayStack := ""
+	
+	return lineMatch
+}
 
 
 
