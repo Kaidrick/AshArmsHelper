@@ -37,7 +37,8 @@ stdLoadTime = 8.0
 yBorder = 36  ; NemuPlayer
 
 ; Click error
-stdErrorRange = 12.0  ; max distance from the click point to the base point in px
+;~ stdErrorRange = 12.0  ; max distance from the click point to the base point in px
+stdErrorRange = 5.0
 
 ; Create GUI control panel
 clickPos := resx["s_ClickPos"]
@@ -223,9 +224,10 @@ return
 TapTap:
 canRun := true
 
+MsgBox % checkUnitSelection()
 ;~ pixelColorMatch(971.2, 523.2, 429213272)
 ;~ areaColorMatch(497.6, 523.2, 4293302272)
-waitSelection()
+;~ waitSelection()
 	;~ 255.8 523.2
 	;~ 497.6 523.2
 	;~ 735.4 523.2
@@ -404,6 +406,7 @@ if(canRun) {
 		
 		if(!logDrops) {
 			;~ findClick("resultBattleStats",,,true)
+			existImage("resultBattleStats.png",,,,,,0)  ; must see
 			
 			; if repeat button is not visible then keep clicking
 			repeatButton := existImage("postStage_Repeat.png", 420, 610, 631, 700, 50, 1)
@@ -501,6 +504,7 @@ if(canRun) {
 		
 		if(!logDrops) {
 			;~ findClick("resultBattleStats",,,true)
+			existImage("resultBattleStats.png",,,,,,0)  ; must see
 			
 			repeatButton := existImage("postStage_Repeat.png", 420, 610, 631, 700, 50, 1)
 			while(!repeatButton) {

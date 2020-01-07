@@ -452,6 +452,90 @@ areaColorMatch(cX, cY, matchColor, waitInterval=0, numTryAllowed=0) {
 }
 
 
+checkUnitSelection() {
+	global asaGameHwnd
+	global canRun
+
+	global yBorder
+	
+	uniColor := 4293302272
+	uni_y := 523.2
+	
+	ps1_x := 974.2  ;~ 3 skills config
+	ps2_x := 735.4
+	ps3_x := 497.6
+	ps4_x := 255.8  ;~ no skill config
+	
+	iters = 0
+
+	if(!canRun) {
+		return false
+	}
+	
+	pBitmapHayStack := Gdip_BitmapFromHWND(asaGameHwnd)
+	
+	offsetDist := -3
+	lineMatch := true
+	while(offsetDist < 4) {
+		pixelColor := Gdip_GetPixel(pBitmapHayStack, ps1_x + offsetDist, uni_y + yBorder)
+		if(pixelColor = uniColor) {
+			offsetDist := offsetDist + 1
+		} else {
+			lineMatch := false
+			break
+		}
+	}
+	
+	if(!lineMatch) {
+		offsetDist := -3
+		lineMatch := true
+		while(offsetDist < 4) {
+			pixelColor := Gdip_GetPixel(pBitmapHayStack, ps2_x + offsetDist, uni_y + yBorder)
+			if(pixelColor = uniColor) {
+				offsetDist := offsetDist + 1
+			} else {
+				lineMatch := false
+				break
+			}
+		}
+	}
+	
+	if(!lineMatch) {
+		offsetDist := -3
+		lineMatch := true
+		while(offsetDist < 4) {
+			pixelColor := Gdip_GetPixel(pBitmapHayStack, ps3_x + offsetDist, uni_y + yBorder)
+			if(pixelColor = uniColor) {
+				offsetDist := offsetDist + 1
+			} else {
+				lineMatch := false
+				break
+			}
+		}
+	}
+	
+	if(!lineMatch) {
+		offsetDist := -3
+		lineMatch := true
+		while(offsetDist < 4) {
+			pixelColor := Gdip_GetPixel(pBitmapHayStack, ps4_x + offsetDist, uni_y + yBorder)
+			if(pixelColor = uniColor) {
+				offsetDist := offsetDist + 1
+			} else {
+				lineMatch := false
+				break
+			}
+		}
+	}
+
+	; try freeing vars
+	Gdip_DisposeImage(pBitmapHayStack)
+	pBitmapHayStack := ""
+	
+	return lineMatch
+}
+
+
 
 hasEarlyResult() {  ; if battle is ended earlier than expected
 	; check win in every loop
@@ -943,11 +1027,11 @@ disableAutoBattle() {  ;~ this function only needs to be called on the first run
 	;~ if so, uncheck it
 	changeStatusText(resx["status_DisableAuto"])
 	autoBattle := existImage("Option_AutoBattle.png", 1129, 615, 1250, 699, 200, 5)
-	if (autoBattle) {
+	while (autoBattle) {
 		;~ click to uncheck the option
 		ExecClick(resx["status_UncheckAuto"], 1193, 641 + yBorder, 0, false)
-		
-		Sleep 500
+		Sleep 200
+		autoBattle := existImage("Option_AutoBattle.png", 1129, 615, 1250, 699, 200, 5)
 	}
 }
 

@@ -179,6 +179,9 @@ battleView_Select(index=1) {
 		hasTurn := existImage("battleView_BattleStart.png",1114,542,1191,622,,true)
 	}
 	
+	
+	;~ TODO: if enemy turn is shown, postpone early result search until next turn
+	
 	;~ GuiControl,, WinSize, % "Coord Click Mode"
 	existImage("battleView_BattleStart.png",1114,542,1191,622,0,0,true)  ; must see
 		
@@ -195,19 +198,37 @@ battleView_Select(index=1) {
 battleView_Deselect(index) {
 	global selectFocus
 	
-	Sleep 100
+	;~ Sleep 200
 	
-	notExistImage("battleView_BattleStart.png",1114,542,1191,622,20,1)
-	; existImage("battleView_ClearAssignment.png",171,477,1027,565,10,0)  ; must see clear button
+	;~ notExistImage("battleView_BattleStart.png",1114,542,1191,622,20,1)
+	;~ ; existImage("battleView_ClearAssignment.png",171,477,1027,565,10,0)  ; must see clear button
 		
-	switch index {
-		case 1: coordClick(113, 638)
-		case 2: coordClick(286, 638)
-		case 3: coordClick(460, 638)
-		case 4: coordClick(634, 638)
-		case 5: coordClick(807, 638)
-		case 6: coordClick(981, 638)
-		Default: coordClick(113, 638)
+	;~ switch index {
+		;~ case 1: coordClick(113, 638)
+		;~ case 2: coordClick(286, 638)
+		;~ case 3: coordClick(460, 638)
+		;~ case 4: coordClick(634, 638)
+		;~ case 5: coordClick(807, 638)
+		;~ case 6: coordClick(981, 638)
+		;~ Default: coordClick(113, 638)
+	;~ }
+	
+	;~ if battle start button is not visible, deselect again until it is visible
+	battleStartButton := existImage("battleView_BattleStart.png",1114,542,1191,622,0,1)
+	while(!battleStartButton) {
+		;~ switch index {
+			;~ case 1: coordClick(113, 638)
+			;~ case 2: coordClick(286, 638)
+			;~ case 3: coordClick(460, 638)
+			;~ case 4: coordClick(634, 638)
+			;~ case 5: coordClick(807, 638)
+			;~ case 6: coordClick(981, 638)
+			;~ Default: coordClick(113, 638)
+		;~ }
+		coordClick(1206, 203)
+		;~ quickTapAnywhere(1)
+		Sleep 100
+		battleStartButton := existImage("battleView_BattleStart.png",1114,542,1191,622,0,1)
 	}
 	
 	selectFocus := false
@@ -244,6 +265,9 @@ battleView_Switch() {
 	global selectFocus
 	
 	waitSelection()
+	Sleep 100
+	
+	;~ image search to confirm switch? TODO
 	
 	; find and click the image?
 	; notExistImage("battleView_BattleStart.png",1114,542,1191,622,20,1)
@@ -260,6 +284,7 @@ battleView_Skill(index) {
 	global selectFocus
 	
 	waitSelection()
+	Sleep 50
 	
 	;~ if(!selectFocus) {  ;~ if no select focus
 		;~ pixelColorMatch(76, 481.2, 4281135593) ; the color of the switch stance button upper left cornor rotate thingy
@@ -350,19 +375,7 @@ waitSelection() {
 	}
 	
 	while(true) {
-		if(areaColorMatch(974.2, 523.2, 4293302272)) {  ;~ 3 skill sets
-			break
-		}
-		
-		if(areaColorMatch(735.4, 523.2, 4293302272)) {  ;~ 2 skill sets
-			break
-		}
-		
-		if(areaColorMatch(497.6, 523.2, 4293302272)) {  ;~ 1 skill set
-			break
-		}
-		
-		if(areaColorMatch(255.8, 523.2, 4293302272)) {  ;~ 0 skill set
+		if(checkUnitSelection()) {  ;~ 0 skill set
 			break
 		}
 	;~ 255.8 523.2
