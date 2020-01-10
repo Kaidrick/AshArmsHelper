@@ -1,5 +1,5 @@
 ﻿INFO,03B,04,N
-DESC,F4F,I-16,MC200,Hurricane[CAP],Grasshopper,BT-5[Frontline],,,SDB,Ju88A,スツーカ,ランカスター
+DESC,F4F,I-16,MC200,Hurricane/ASUP,Grasshopper/LRNG,BT-5/FRLN,,,SDB,Ju88A,スツーカ,ランカスター
 SELECT,6,
 MOVE,4,
 SWITCH,,

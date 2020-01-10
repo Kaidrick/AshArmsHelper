@@ -17,7 +17,7 @@ FileEncoding, UTF-8
 ; 2. add the ability to choose stage automatically (partially implemented)
 ;       * use horizontal click and drag to move the stage map
 ; 3. validate clicks; that is, check if click is successfual / UI is responsive for this click; if not, retry      
-; 
+; 4. add a stop script after this run button.
 
 LC_path := A_ScriptDir "\lang.ini"
 FileReadLine, LC, %LC_path%, 1
@@ -271,11 +271,11 @@ return
 
 
 MasterRoutine:
-runCount = 0  ;~ reset runCount on start
+runCount := 0  ;~ reset runCount on start
 
 if(previousRunCount != 0) {
 	runCount := previousRunCount
-	previousRunCount = 0
+	previousRunCount := 0
 }
 
 GuiControl,, RunNum, % resx["round"] runCount

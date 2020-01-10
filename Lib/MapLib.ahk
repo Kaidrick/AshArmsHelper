@@ -908,12 +908,21 @@ checkLoginOnBadAuth() {
 	;~ as long as Error_TitleScreen.png exists, click a random place to try to login unless number of retries reaches 200
 	while(titleScreen) {
 		titleScreen := existImage("Error_TitleScreen.png", 549, 671, 577, 704, 50, 1)
+		errorPrompt := existImage("Error_ConfirmButton.PNG",,,,,50,1)
 		
+		;~ if no @cydonia logo and no error
+		;~ because logo may be blurred if an error occurs
 		if (titleScreen) {
 			;~ tap to start
 			changeStatusText(resx["err_AuthExp"])
 			quickTapAnywhere(1)
+			
+			;~ TODO: connection error may happen here
+			
 			Sleep 1000
+		} else if (errorPrompt) {
+			handleGeneralError()
+		
 		} else {
 			changeStatusText(resx["status_LoginSuccess"])
 			Sleep 5000
