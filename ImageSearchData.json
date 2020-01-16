@@ -18,13 +18,13 @@
 	},
 	
 	"orderReady": {
-		"x": 1048, "y": 654, 
+		"x": 871, "y": 595, 
 		"path": "mapSel_OrderReady.png", 
 		"offset": {
-			"x": 75, "y": 48
+			"x": -36, "y": -1
 		}, 
 		"size": {
-			"w": 58, "h": 64
+			"w": 29, "h": 36
 		}, 
 		"searchRegion": {
 			"X1": 908,
